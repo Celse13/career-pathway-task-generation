@@ -1,0 +1,92 @@
+[
+  {
+    "question": "Which HTTP method is used to retrieve data from a server?",
+    "correctAnswer": "GET",
+    "wrongAnswers": [
+      "POST",
+      "PUT",
+      "DELETE"
+    ]
+  },
+  {
+    "question": "What HTTP method is used to submit data to be processed to a specified resource?",
+    "correctAnswer": "POST",
+    "wrongAnswers": [
+      "GET",
+      "PATCH",
+      "HEAD"
+    ]
+  },
+  {
+    "question": "Which HTTP method is used to update a resource?",
+    "correctAnswer": "PUT",
+    "wrongAnswers": [
+      "GET",
+      "DELETE",
+      "OPTIONS"
+    ]
+  },
+  {
+    "question": "What HTTP method is used to delete a specified resource?",
+    "correctAnswer": "DELETE",
+    "wrongAnswers": [
+      "POST",
+      "PUT",
+      "TRACE"
+    ]
+  },
+  {
+    "question": "Which HTTP method is used to apply partial modifications to a resource?",
+    "correctAnswer": "PATCH",
+    "wrongAnswers": [
+      "PUT",
+      "POST",
+      "GET"
+    ]
+  },
+  {
+    "question": "What HTTP method is used to retrieve the headers of a resource without fetching its body?",
+    "correctAnswer": "HEAD",
+    "wrongAnswers": [
+      "GET",
+      "OPTIONS",
+      "CONNECT"
+    ]
+  },
+  {
+    "question": "Which HTTP method is used to describe the communication options for the target resource?",
+    "correctAnswer": "OPTIONS",
+    "wrongAnswers": [
+      "GET",
+      "POST",
+      "PUT"
+    ]
+  },
+  {
+    "question": "What HTTP method is used to establish a network connection to a resource?",
+    "correctAnswer": "CONNECT",
+    "wrongAnswers": [
+      "GET",
+      "POST",
+      "TRACE"
+    ]
+  },
+  {
+    "question": "Which HTTP method is used to perform a message loop-back test along the path to the target resource?",
+    "correctAnswer": "TRACE",
+    "wrongAnswers": [
+      "GET",
+      "POST",
+      "HEAD"
+    ]
+  },
+  {
+    "question": "What HTTP method is considered idempotent, meaning multiple identical requests should have the same effect as a single request?",
+    "correctAnswer": "PUT",
+    "wrongAnswers": [
+      "POST",
+      "PATCH",
+      "DELETE"
+    ]
+  }
+]
