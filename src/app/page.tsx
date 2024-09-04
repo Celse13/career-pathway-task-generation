@@ -1,15 +1,54 @@
-
 'use client';
 
-import TriviaCard from "@/components/Card";
-import triviaQuestions from "@/data/triviaQuestions.json";
+import { type CoreMessage } from 'ai';
+import { useState } from 'react';
+import { generateQuestions } from "@/app/actions/actions";
+
+// Allow streaming responses up to 30 seconds
+export const maxDuration = 30;
 
 export default function Chat() {
+    const [messages, setMessages] = useState<CoreMessage[]>([]);
+    const [input, setInput] = useState('');
+
     return (
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
-            {triviaQuestions.map((question, index) => (
-                <TriviaCard key={index} questionData={question} />
+        <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
+            {messages.map((m, i) => (
+                <div key={i} className="whitespace-pre-wrap">
+                    {m.role === 'user' ? 'User: ' : 'AI: '}
+                    {m.content as string}
+                </div>
             ))}
+
+            <form
+                onSubmit={async e => {
+                    e.preventDefault();
+                    const newMessages: CoreMessage[] = [
+                        ...messages,
+                        { content: input, role: 'user' },
+                    ];
+
+                    setMessages(newMessages);
+                    setInput('');
+
+                    const result = await generateQuestions(input);
+
+                    setMessages([
+                        ...newMessages,
+                        ...result.map((question: any) => ({
+                            role: 'assistant' as const,
+                            content: JSON.stringify(question, null, 2),
+                        })),
+                    ]);
+                }}
+            >
+                <input
+                    className="fixed bottom-0 w-full max-w-md p-2 mb-8 border border-gray-300 rounded shadow-xl"
+                    value={input}
+                    placeholder="Say something..."
+                    onChange={e => setInput(e.target.value)}
+                />
+            </form>
         </div>
     );
 }

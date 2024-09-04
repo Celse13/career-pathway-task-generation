@@ -57,14 +57,63 @@ export const QuestionSchema = z.object({
 
 
 
+const questionTypes = {
+    multipleChoice: {
+        type: 'multiple choice',
+        description: 'Select the correct answer from the given options.',
+    },
+    checkbox: {
+        type: 'checkbox',
+        description: 'Select all correct answers from the given options.',
+    },
+    text: {
+        type: 'text',
+        description: 'Provide a detailed answer to the question.',
+    },
+    paragraph: {
+        type: 'paragraph',
+        description: 'Provide a long-form answer to the question.',
+    },
+    coding: {
+        type: 'coding',
+        description: 'Write code to solve the given problem.',
+    },
+    dropdown: {
+        type: 'dropdown',
+        description: 'Select the correct answer from the dropdown options.',
+    },
+    linearScale: {
+        type: 'linear scale',
+        description: 'Rate on a scale from min to max.',
+    },
+    date: {
+        type: 'date',
+        description: 'Select a date.',
+    },
+    fileUpload: {
+        type: 'file upload',
+        description: 'Upload a file.',
+    },
+    range: {
+        type: 'range',
+        description: 'Select a value within a range.',
+    },
+    rating: {
+        type: 'rating',
+        description: 'Rate on a scale.',
+    },
+};
 
+// Function to generate questions using the AI SDK
 export const generateQuestions = async (topic, userPreferences = []) => {
     'use server';
 
+    // Validate userPreferences
     if (!Array.isArray(userPreferences)) {
         throw new Error('userPreferences must be an array');
     }
 
+    // Filter question types based on user preferences
     const selectedQuestionTypes = userPreferences.map(pref => {
         if (!questionTypes[pref]) {
             throw new Error(`Invalid question type: ${pref}`);
@@ -110,7 +159,7 @@ export const generateQuestions = async (topic, userPreferences = []) => {
 
 const writeQuestionsToFile = async (questions) => {
     const filePath = path.join('./src/data', 'triviaQuestions.json');
-    const data = JSON.stringify(questions, null, 2);
+    const data = JSON.stringify(questions, null, 2); // Convert questions to JSON string
     fs.writeFileSync(filePath, data);
     console.log('Written questions to file:', filePath);
 };
@@ -120,6 +169,7 @@ export const generateServerSide = async () => {
         console.log('Starting to generate trivia questions...');
         const object = await generateQuestions('Sample Topic', ['multipleChoice', 'text']);
 
+        // Ensure parsedQuestions is defined and correctly formatted
         const parsedQuestions = QuestionSchema.array().parse(object);
         if (!parsedQuestions) {
             throw new Error('Parsed questions are undefined or null');
