@@ -1,14 +1,27 @@
+// src/app/page.tsx
 'use client';
 
 import { type CoreMessage } from 'ai';
 import { useState, useEffect } from 'react';
 import { generateQuestions } from "@/app/actions/actions";
+import MultipleChoiceQuestion from '@/components/questions/MultipleChoiceQuestion';
+import CheckboxQuestion from '@/components/questions/CheckboxQuestion';
+import TextQuestion from '@/components/questions/TextQuestion';
+import ParagraphQuestion from '@/components/questions/ParagraphQuestion';
+import CodingQuestion from '@/components/questions/CodingQuestion';
+import DropdownQuestion from '@/components/questions/DropdownQuestion';
+import LinearScaleQuestion from '@/components/questions/LinearScaleQuestion';
+import DateQuestion from '@/components/questions/DateQuestion';
+import FileUploadQuestion from '@/components/questions/FileUploadQuestion';
+import RangeQuestion from '@/components/questions/RangeQuestion';
+import RatingQuestion from '@/components/questions/RatingQuestion';
 
 export default function Chat() {
     const [messages, setMessages] = useState<CoreMessage[]>([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const [dots, setDots] = useState(1);
+
     useEffect(() => {
         if (loading) {
             const interval = setInterval(() => {
@@ -19,13 +32,42 @@ export default function Chat() {
         }
     }, [loading]);
 
+    const renderQuestion = (question: any) => {
+        switch (question.type) {
+            case 1:
+                return <MultipleChoiceQuestion title={question.title} choices={question.choices} />;
+            case 2:
+                return <CheckboxQuestion title={question.title} choices={question.choices} />;
+            case 3:
+                return <TextQuestion title={question.title} />;
+            case 4:
+                return <ParagraphQuestion title={question.title} />;
+            case 5:
+                return <CodingQuestion title={question.title} />;
+            case 6:
+                return <DropdownQuestion title={question.title} choices={question.choices} />;
+            case 7:
+                return <LinearScaleQuestion title={question.title} min={1} max={5} />;
+            case 8:
+                return <DateQuestion title={question.title} />;
+            case 9:
+                return <FileUploadQuestion title={question.title} />;
+            case 10:
+                return <RangeQuestion title={question.title} min={1} max={100} />;
+            case 11:
+                return <RatingQuestion title={question.title} maxRating={5} />;
+            default:
+                return null;
+        }
+    };
+
     return (
         <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
             <div className="flex flex-col space-y-4">
                 {messages.map((m, i) => (
                     <div key={i} className="whitespace-pre-wrap">
                         {m.role === 'user' ? 'User: ' : 'AI: '}
-                        {m.content as string}
+                        {typeof m.content === 'string' ? m.content : renderQuestion(m.content.QuestionSchema)}
                     </div>
                 ))}
 
@@ -57,7 +99,7 @@ export default function Chat() {
                             ...newMessages,
                             ...result.map((question: any) => ({
                                 role: 'assistant' as const,
-                                content: JSON.stringify(question, null, 2),
+                                content: question,
                             })),
                         ]);
                     } catch (error) {

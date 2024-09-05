@@ -1,14 +1,11 @@
 import { z } from 'zod';
-import { anthropic } from '@ai-sdk/anthropic'
-import {QuestionChoiceSchema} from "@/db/questionChoiceSchema";
-
+import { v4 as uuidv4 } from 'uuid';
+import { QuestionChoiceSchema } from "@/db/questionChoiceSchema";
 import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 
-
-
 export const QuestionSchema = z.object({
-    id: z.string(),
+    id: z.string().uuid().default(() => uuidv4()), // Ensure id is a UUID
     type: z.number(),
     title: z.string(),
     description: z.string().optional(),
