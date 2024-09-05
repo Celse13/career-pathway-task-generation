@@ -45,7 +45,7 @@ export default function Chat() {
             case 5:
                 return <CodingQuestion title={question.title} />;
             case 6:
-                return <DropdownQuestion title={question.title} choices={question.choices} />;
+                return <DropdownQuestion title={question.title} metadata={question.metadata} />;
             case 7:
                 return <LinearScaleQuestion title={question.title} min={1} max={5} />;
             case 8:
@@ -67,7 +67,7 @@ export default function Chat() {
                 {messages.map((m, i) => (
                     <div key={i} className="whitespace-pre-wrap">
                         {m.role === 'user' ? 'User: ' : 'AI: '}
-                        {typeof m.content === 'string' ? m.content : renderQuestion(m.content.QuestionSchema)}
+                        {typeof m.content === 'string' ? m.content : renderQuestion(m.content)}
                     </div>
                 ))}
 

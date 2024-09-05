@@ -1,3 +1,4 @@
+// src/app/actions/actions.ts
 "use server";
 
 import { QuestionSchema } from "@/db/schema";
@@ -17,7 +18,7 @@ export const generateQuestions = async (input: string) => {
             ${input}
             Format the response as JSON in the shape of: ${JSON.stringify(QuestionSchema.array())}
             Whenever the user has preferred question types from this object list ${JSON.stringify(selectedQuestionTypes)}
-            be sure to provide the question according to the preference. However, if not specific 
+            be sure to provide the question according to the preference. However, if not specific
             provide all relevant and applicable question type to the topic
             following types of questions: ${JSON.stringify(selectedQuestionTypes)}
             Be sure to be cautious about the user preferred question type. That's to say once the user input is requesting
@@ -32,7 +33,7 @@ export const generateQuestions = async (input: string) => {
             prompt: prompt,
             system: `You are a question generator! and considering the user input,
             be sure to generate questions referring to this schema ${JSON.stringify(selectedQuestionTypes)}`,
-            schema: z.object({QuestionSchema}),
+            schema: QuestionSchema,
             output: 'array',
         });
 
@@ -42,6 +43,13 @@ export const generateQuestions = async (input: string) => {
         }
 
         console.log('Generated task:', task);
+        task.forEach((question, index) => {
+            console.log(`Question ${index + 1}:`, question);
+            Object.entries(question).forEach(([key, value]) => {
+                console.log(`  ${key}:`, value);
+            });
+        });
+
         return task;
 
     } catch (error) {

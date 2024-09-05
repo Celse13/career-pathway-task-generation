@@ -21,6 +21,7 @@ const DropdownQuestion = ({ title, metadata }: DropdownQuestionProps) => {
     const [choices, setChoices] = useState<Choice[]>([]);
 
     useEffect(() => {
+        console.log('Metadata:', metadata); // Log metadata for debugging
         if (metadata && metadata.dropDown && Array.isArray(metadata.dropDown.datasetData)) {
             const newChoices = metadata.dropDown.datasetData.map((data, index) => ({
                 id: `${index}`,
