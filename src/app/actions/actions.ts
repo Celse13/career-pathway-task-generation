@@ -6,26 +6,29 @@ import { generateObject } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { z } from 'zod';
 
-export const generateQuestions = async (input: string, userPreferences = []) => {
+export const generateQuestions = async (input: string) => {
     'use server';
 
-    const selectedQuestionTypes = userPreferences.map(pref => {
-        if (!questionTypes[pref]) {
-            throw new Error(`Invalid question type: ${pref}`);
-        }
-        return questionTypes[pref];
-    });
+    const defaultQuestionTypes = Object.keys(questionTypes);
+    let selectedQuestionTypes = defaultQuestionTypes;
+
+
 
     try {
-        const prompt = `${input}
-            Format the response as JSON in the shape of: ${JSON.stringify(QuestionSchema)}
-            Include the following types of questions: ${JSON.stringify(selectedQuestionTypes)}`;
+        const prompt = `
+            ${input}
+            Format the response as JSON in the shape of: ${JSON.stringify(QuestionSchema.array())}
+            Whenver the user has preferred question types from this object list  ${JSON.stringify(selectedQuestionTypes)}
+            be sure to provide the question according to the preference. However, if not specific 
+            provide all relevant and application questinon type to the topic
+            following types of questions: ${JSON.stringify(selectedQuestionTypes)}
+            Ensure that the generated questions cover all specified types.`;
 
         const { object: task } = await generateObject({
             model: anthropic('claude-3-5-sonnet-20240620'),
             prompt: prompt,
-            system: `You are a question generator! and considering the user input, 
-            be sure to generate a question referring to this schema ${JSON.stringify(selectedQuestionTypes)}`,
+            system: `You are a question generator! and considering the user input,
+            be sure to generate questions referring to this schema ${JSON.stringify(selectedQuestionTypes)}`,
             schema: QuestionSchema,
             output: 'array',
         });
