@@ -1,11 +1,18 @@
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
-import { QuestionChoiceSchema } from "@/db/questionChoiceSchema";
+// import { QuestionChoiceSchema } from "@/db/questionChoiceSchema";
 import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 
+export const QuestionChoiceSchema = z.object({
+    id: z.string().uuid().default(() => uuidv4()),
+    choice: z.string(),
+    isCorrect: z.boolean(),
+});
+
+
 export const QuestionSchema = z.object({
-    id: z.string().uuid().default(() => uuidv4()), // Ensure id is a UUID
+    id: z.string().uuid().default(() => uuidv4()),
     type: z.number(),
     title: z.string(),
     description: z.string().optional(),

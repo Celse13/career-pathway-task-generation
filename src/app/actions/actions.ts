@@ -45,6 +45,7 @@ export const generateQuestions = async (input: string) => {
         console.log('Generated task:', task);
         task.forEach((question, index) => {
             console.log(`Question ${index + 1}:`, question);
+            console.log(`  ID: ${question.id}`);
             Object.entries(question).forEach(([key, value]) => {
                 console.log(`  ${key}:`, value);
             });
