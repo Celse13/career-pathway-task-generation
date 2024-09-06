@@ -9,6 +9,7 @@ interface Choice {
 interface MultipleChoiceQuestionProps {
     title: string;
     choices: Choice[];
+    onAnswerChange: (answer: string[]) => void;
 }
 
 const MultipleChoiceQuestion = ({ title, choices } : MultipleChoiceQuestionProps) => {

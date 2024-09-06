@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { baseQuestionSchema } from '@/db/questionsSchema/baseQuestionSchema';
+import { v4 as uuidv4 } from 'uuid';
 
 const metadataSchema = z.object({
     automatedResponse: z.string().optional(),
@@ -22,6 +23,7 @@ export const paragraphQuestionSchema = baseQuestionSchema.extend({
 export const multipleChoiceQuestionSchema = baseQuestionSchema.extend({
     type: z.literal('multiple-choice'),
     choices: z.array(z.object({
+        id: z.string().uuid().default(() => uuidv4()),
         choice: z.string(),
         isCorrect: z.boolean().optional(),
     }))

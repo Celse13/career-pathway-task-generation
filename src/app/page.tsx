@@ -1,3 +1,4 @@
+// src/app/page.tsx
 'use client';
 
 import { type CoreMessage } from 'ai';
@@ -15,6 +16,7 @@ import FileUploadQuestion from '@/components/questions/FileUploadQuestion';
 import RangeQuestion from '@/components/questions/RangeQuestion';
 import RatingQuestion from '@/components/questions/RatingQuestion';
 import QuestionTypeSelector from '@/components/QuestionTypeSelector';
+import { gradeAnswers } from '@/utils/gradeAnswers';
 
 export default function Chat() {
     const [messages, setMessages] = useState<CoreMessage[]>([]);
@@ -22,6 +24,8 @@ export default function Chat() {
     const [loading, setLoading] = useState(false);
     const [dots, setDots] = useState(1);
     const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<string[]>([]);
+    const [userAnswers, setUserAnswers] = useState<{ [key: string]: string | string[] }>({});
+    const [questions, setQuestions] = useState<any[]>([]);
 
     useEffect(() => {
         if (loading) {
@@ -41,12 +45,19 @@ export default function Chat() {
         );
     };
 
+    const handleAnswerChange = (questionId: string, answer: string | string[]) => {
+        setUserAnswers((prevAnswers) => ({
+            ...prevAnswers,
+            [questionId]: answer,
+        }));
+    };
+
     const renderQuestion = (question: any) => {
         switch (question.type) {
             case 'multiple-choice':
-                return <MultipleChoiceQuestion title={question.title} choices={question.choices} />;
+                return <MultipleChoiceQuestion title={question.title} choices={question.choices} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
             case 'checkboxes':
-                return <CheckboxQuestion title={question.title} choices={question.choices} />;
+                return <CheckboxQuestion title={question.title} choices={question.choices} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
             case 'text':
                 return <TextQuestion title={question.title} />;
             case 'paragraph':
@@ -70,6 +81,11 @@ export default function Chat() {
         }
     };
 
+    const checkAnswers = () => {
+        const results = gradeAnswers(userAnswers, questions);
+        console.log('Grading results:', results);
+    };
+
     return (
         <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
             <form
@@ -86,6 +102,8 @@ export default function Chat() {
 
                     try {
                         const result = await generateQuestions(input, selectedQuestionTypes);
+                        console.log('Generated questions:', result); // Log the response
+                        setQuestions(result);
 
                         setMessages([
                             ...newMessages,
@@ -125,6 +143,7 @@ export default function Chat() {
                     </div>
                 )}
             </div>
+            <button onClick={checkAnswers}>Check Answers</button>
         </div>
     );
 }

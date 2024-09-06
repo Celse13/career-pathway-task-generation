@@ -9,9 +9,10 @@ interface Choice {
 interface CheckboxQuestionProps {
     title: string;
     choices: Choice[];
+    onAnswerChange: (answer: string[]) => void;
 }
 
-const CheckboxQuestion = ({ title, choices } : CheckboxQuestionProps) => {
+const CheckboxQuestion = ({ title, choices, onAnswerChange } : CheckboxQuestionProps) => {
     return (
         <Card>
             <CardHeader>
