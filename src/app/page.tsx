@@ -1,4 +1,3 @@
-// src/app/page.tsx
 'use client';
 
 import { type CoreMessage } from 'ai';
@@ -15,12 +14,14 @@ import DateQuestion from '@/components/questions/DateQuestion';
 import FileUploadQuestion from '@/components/questions/FileUploadQuestion';
 import RangeQuestion from '@/components/questions/RangeQuestion';
 import RatingQuestion from '@/components/questions/RatingQuestion';
+import QuestionTypeSelector from '@/components/QuestionTypeSelector';
 
 export default function Chat() {
     const [messages, setMessages] = useState<CoreMessage[]>([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const [dots, setDots] = useState(1);
+    const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<string[]>([]);
 
     useEffect(() => {
         if (loading) {
@@ -32,30 +33,38 @@ export default function Chat() {
         }
     }, [loading]);
 
+    const handleTypeChange = (type: string) => {
+        setSelectedQuestionTypes((prevTypes) =>
+            prevTypes.includes(type)
+                ? prevTypes.filter((t) => t !== type)
+                : [...prevTypes, type]
+        );
+    };
+
     const renderQuestion = (question: any) => {
         switch (question.type) {
-            case 1:
+            case 'multiple-choice':
                 return <MultipleChoiceQuestion title={question.title} choices={question.choices} />;
-            case 2:
+            case 'checkboxes':
                 return <CheckboxQuestion title={question.title} choices={question.choices} />;
-            case 3:
+            case 'text':
                 return <TextQuestion title={question.title} />;
-            case 4:
+            case 'paragraph':
                 return <ParagraphQuestion title={question.title} />;
-            case 5:
+            case 'coding':
                 return <CodingQuestion title={question.title} />;
-            case 6:
+            case 'dropdown':
                 return <DropdownQuestion title={question.title} metadata={question.metadata} />;
-            case 7:
-                return <LinearScaleQuestion title={question.title} min={1} max={5} />;
-            case 8:
+            case 'linear-scale':
+                return <LinearScaleQuestion title={question.title} min={question.min} max={question.max} />;
+            case 'date':
                 return <DateQuestion title={question.title} />;
-            case 9:
+            case 'file-upload':
                 return <FileUploadQuestion title={question.title} />;
-            case 10:
-                return <RangeQuestion title={question.title} min={1} max={100} />;
-            case 11:
-                return <RatingQuestion title={question.title} maxRating={5} />;
+            case 'range':
+                return <RangeQuestion title={question.title} min={question.min} max={question.max} />;
+            case 'rating':
+                return <RatingQuestion title={question.title} maxRating={question.maxRating} />;
             default:
                 return null;
         }
@@ -63,27 +72,10 @@ export default function Chat() {
 
     return (
         <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
-            <div className="flex flex-col space-y-4">
-                {messages.map((m, i) => (
-                    <div key={i} className="whitespace-pre-wrap">
-                        {m.role === 'user' ? 'User: ' : 'AI: '}
-                        {typeof m.content === 'string' ? m.content : renderQuestion(m.content)}
-                    </div>
-                ))}
-
-                {loading && (
-                    <div className="flex justify-start items-center py-4">
-                        <span className="ml-2 text-gray-500">
-                            {`Generating questions${'.'.repeat(dots)}`}
-                        </span>
-                    </div>
-                )}
-            </div>
-
             <form
                 onSubmit={async e => {
                     e.preventDefault();
-                    setLoading(true); // Set loading to true
+                    setLoading(true);
                     const newMessages: CoreMessage[] = [
                         ...messages,
                         { content: input, role: 'user' },
@@ -93,7 +85,7 @@ export default function Chat() {
                     setInput('');
 
                     try {
-                        const result = await generateQuestions(input);
+                        const result = await generateQuestions(input, selectedQuestionTypes);
 
                         setMessages([
                             ...newMessages,
@@ -110,12 +102,29 @@ export default function Chat() {
                 }}
             >
                 <input
-                    className="fixed bottom-0 w-full max-w-md p-2 mb-8 border border-gray-300 rounded shadow-xl"
+                    className="w-full p-2 mb-4 border border-gray-300 rounded shadow-xl"
                     value={input}
                     placeholder="Say something..."
                     onChange={e => setInput(e.target.value)}
                 />
             </form>
+            <QuestionTypeSelector selectedTypes={selectedQuestionTypes} onTypeChange={handleTypeChange} />
+            <div className="flex flex-col space-y-4">
+                {messages.map((m, i) => (
+                    <div key={i} className="whitespace-pre-wrap">
+                        {m.role === 'user' ? 'User: ' : 'AI: '}
+                        {typeof m.content === 'string' ? m.content : renderQuestion(m.content)}
+                    </div>
+                ))}
+
+                {loading && (
+                    <div className="flex justify-start items-center py-4">
+                        <span className="ml-2 text-gray-500">
+                            {`Generating questions${'.'.repeat(dots)}`}
+                        </span>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

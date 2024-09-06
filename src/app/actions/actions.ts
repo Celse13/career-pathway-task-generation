@@ -1,46 +1,37 @@
-// src/app/actions/actions.ts
 "use server";
 
-import { QuestionSchema } from "@/db/schema";
 import { questionTypes } from "@/Types/QuestionTypes";
 import { generateObject } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { z } from 'zod';
+import { questionSchema } from "@/db/questionSchema";
 
-export const generateQuestions = async (input: string) => {
+export const generateQuestions = async (input: string, selectedQuestionTypes: string[] = []) => {
     'use server';
-
-    const defaultQuestionTypes = Object.keys(questionTypes);
-    let selectedQuestionTypes = defaultQuestionTypes;
 
     try {
         const prompt = `
-            ${input}
-            Format the response as JSON in the shape of: ${JSON.stringify(QuestionSchema.array())}
-            Whenever the user has preferred question types from this object list ${JSON.stringify(selectedQuestionTypes)}
-            be sure to provide the question according to the preference. However, if not specific
-            provide all relevant and applicable question type to the topic
-            following types of questions: ${JSON.stringify(selectedQuestionTypes)}
-            Be sure to be cautious about the user preferred question type. That's to say once the user input is requesting
-            for the specific question type, be sure to only apply that question type.
-            Ensure that the generated questions cover all specified types in the user input ${input}.
-            If the user prompt is requesting large information and you realized that it beyond you generation
-            capacity, be sure to provide response in chunks considering what you are being asked for
-            `;
+            Based on the following input: "${input}", generate a list of questions.
+            Ensure that the questions are formatted as valid JSON.
+            The user has specified preferred question types: ${JSON.stringify(selectedQuestionTypes)}.
+            Only generate questions that match the specified types. 
+            If no types are specified, generate a diverse set of questions.
+            Avoid including any questions that do not conform to the specified types.
+        `;
 
         const { object: task } = await generateObject({
             model: anthropic('claude-3-5-sonnet-20240620'),
             prompt: prompt,
-            system: `You are a question generator! and considering the user input,
-            be sure to generate questions referring to this schema ${JSON.stringify(selectedQuestionTypes)}`,
-            schema: QuestionSchema,
+            system: `
+                 You are a question generator.
+                 Adhere strictly to the user's specified question types.
+                 If the input specifies a question type, only generate that type.
+                 If no types are specified, create a variety of questions.
+                 Ensure all output is in valid JSON format.
+                 `,
+            schema: questionSchema,
             output: 'array',
         });
-
-        // Ensure the task is an array of objects
-        if (!Array.isArray(task) || !task.every(item => typeof item === 'object')) {
-            throw new Error('Validation failed: value must be an object that contains an array of elements');
-        }
 
         console.log('Generated task:', task);
         task.forEach((question, index) => {
@@ -62,4 +53,4 @@ export const generateQuestions = async (input: string) => {
             throw error;
         }
     }
-};
+}

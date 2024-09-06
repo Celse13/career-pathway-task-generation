@@ -1,4 +1,3 @@
-// src/components/questions/DropdownQuestion.tsx
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useState, useEffect } from 'react';
 
