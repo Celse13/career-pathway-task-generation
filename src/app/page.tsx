@@ -65,7 +65,7 @@ export default function Chat() {
             case 'coding':
                 return <CodingQuestion title={question.title} />;
             case 'dropdown':
-                return <DropdownQuestion title={question.title} metadata={question.metadata} />;
+                return <DropdownQuestion title={question.title} choices={question.choices} />;
             case 'linear-scale':
                 return <LinearScaleQuestion title={question.title} min={question.min} max={question.max} />;
             case 'date':

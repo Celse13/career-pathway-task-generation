@@ -4,31 +4,30 @@ import { useState, useEffect } from 'react';
 interface Choice {
     id: string;
     choice: string;
+    isCorrect?: boolean;
 }
 
 interface DropdownQuestionProps {
     title: string;
-    metadata: {
-        dropDown: {
-            dataset: string;
-            datasetData: string[];
-        };
-    };
+    choices: {
+        choice: string;
+        isCorrect?: boolean;
+    }[];
 }
 
-const DropdownQuestion = ({ title, metadata }: DropdownQuestionProps) => {
+const DropdownQuestion = ({ title, choices: initialChoices }: DropdownQuestionProps) => {
     const [choices, setChoices] = useState<Choice[]>([]);
 
     useEffect(() => {
-        console.log('Metadata:', metadata); // Log metadata for debugging
-        if (metadata && metadata.dropDown && Array.isArray(metadata.dropDown.datasetData)) {
-            const newChoices = metadata.dropDown.datasetData.map((data, index) => ({
+        if (Array.isArray(initialChoices)) {
+            const newChoices = initialChoices.map((data, index) => ({
                 id: `${index}`,
-                choice: data,
+                choice: data.choice,
+                isCorrect: data.isCorrect,
             }));
             setChoices(newChoices);
         }
-    }, [metadata]);
+    }, [initialChoices]);
 
     const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedId = event.target.value;

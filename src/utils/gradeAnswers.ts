@@ -5,13 +5,15 @@ export const gradeAnswers = (userAnswers: { [key: string]: string | string[] }, 
         let isCorrect = false;
 
         switch (question.type) {
-            case 'multiple-choice':
+            case 'multipleChoice':
                 isCorrect = userAnswer === question.correctAnswer;
                 break;
             case 'checkboxes':
                 isCorrect = Array.isArray(userAnswer) && userAnswer.sort().toString() === question.correctAnswers.sort().toString();
                 break;
-            // Add more cases for other question types if needed
+            case 'dropdown':
+                isCorrect = userAnswer === question.correctAnswer;
+                break;
             default:
                 break;
         }
