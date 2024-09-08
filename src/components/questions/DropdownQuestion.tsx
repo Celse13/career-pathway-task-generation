@@ -18,6 +18,7 @@ interface DropdownQuestionProps {
 
 const DropdownQuestion = ({ title, choices: initialChoices, onAnswerChange }: DropdownQuestionProps) => {
     const [choices, setChoices] = useState<Choice[]>([]);
+    const [selectedChoice, setSelectedChoice] = useState<string>('');
 
     useEffect(() => {
         if (Array.isArray(initialChoices)) {
@@ -32,6 +33,7 @@ const DropdownQuestion = ({ title, choices: initialChoices, onAnswerChange }: Dr
 
     const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedId = event.target.value;
+        setSelectedChoice(selectedId);
         const choice = choices.find(choice => choice.id === selectedId);
         if (choice) {
             console.log(`Selected Choice ID: ${choice.id}, Choice: ${choice.choice}`);
@@ -45,7 +47,10 @@ const DropdownQuestion = ({ title, choices: initialChoices, onAnswerChange }: Dr
                 <CardTitle>{title}</CardTitle>
             </CardHeader>
             <CardContent>
-                <select className="w-full p-2 border rounded" onChange={handleChange}>
+                <select className="w-full p-2 border rounded" value={selectedChoice} onChange={handleChange}>
+                    <option value="" disabled>
+                        Please select an option
+                    </option>
                     {choices.length > 0 ? (
                         choices.map(choice => (
                             <option key={choice.id} value={choice.id}>
