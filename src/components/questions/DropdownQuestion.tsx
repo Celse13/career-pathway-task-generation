@@ -13,9 +13,10 @@ interface DropdownQuestionProps {
         choice: string;
         isCorrect?: boolean;
     }[];
+    onAnswerChange: (answer: string) => void;
 }
 
-const DropdownQuestion = ({ title, choices: initialChoices }: DropdownQuestionProps) => {
+const DropdownQuestion = ({ title, choices: initialChoices, onAnswerChange }: DropdownQuestionProps) => {
     const [choices, setChoices] = useState<Choice[]>([]);
 
     useEffect(() => {
@@ -34,6 +35,7 @@ const DropdownQuestion = ({ title, choices: initialChoices }: DropdownQuestionPr
         const choice = choices.find(choice => choice.id === selectedId);
         if (choice) {
             console.log(`Selected Choice ID: ${choice.id}, Choice: ${choice.choice}`);
+            onAnswerChange(choice.choice);
         }
     };
 

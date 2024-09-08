@@ -1,4 +1,3 @@
-// src/app/page.tsx
 'use client';
 
 import { type CoreMessage } from 'ai';
@@ -26,6 +25,7 @@ export default function Chat() {
     const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<string[]>([]);
     const [userAnswers, setUserAnswers] = useState<{ [key: string]: string | string[] }>({});
     const [questions, setQuestions] = useState<any[]>([]);
+    const [gradingResults, setGradingResults] = useState<{ questionId: string, isCorrect: boolean }[]>([]);
 
     useEffect(() => {
         if (loading) {
@@ -46,6 +46,7 @@ export default function Chat() {
     };
 
     const handleAnswerChange = (questionId: string, answer: string | string[]) => {
+        console.log(`Updating answer for question ${questionId}:`, answer);
         setUserAnswers((prevAnswers) => ({
             ...prevAnswers,
             [questionId]: answer,
@@ -58,14 +59,8 @@ export default function Chat() {
                 return <MultipleChoiceQuestion title={question.title} choices={question.choices} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
             case 'checkboxes':
                 return <CheckboxQuestion title={question.title} choices={question.choices} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
-            case 'text':
-                return <TextQuestion title={question.title} />;
-            case 'paragraph':
-                return <ParagraphQuestion title={question.title} />;
-            case 'coding':
-                return <CodingQuestion title={question.title} />;
             case 'dropdown':
-                return <DropdownQuestion title={question.title} choices={question.choices} />;
+                return <DropdownQuestion title={question.title} choices={question.choices} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
             case 'linear-scale':
                 return <LinearScaleQuestion title={question.title} min={question.min} max={question.max} />;
             case 'date':
@@ -82,7 +77,10 @@ export default function Chat() {
     };
 
     const checkAnswers = () => {
+        console.log('User Answers:', userAnswers);
+        console.log('Questions:', questions);
         const results = gradeAnswers(userAnswers, questions);
+        setGradingResults(results);
         console.log('Grading results:', results);
     };
 
@@ -125,6 +123,7 @@ export default function Chat() {
                     placeholder="Say something..."
                     onChange={e => setInput(e.target.value)}
                 />
+                <button type="submit">Submit</button>
             </form>
             <QuestionTypeSelector selectedTypes={selectedQuestionTypes} onTypeChange={handleTypeChange} />
             <div className="flex flex-col space-y-4">
@@ -144,6 +143,13 @@ export default function Chat() {
                 )}
             </div>
             <button onClick={checkAnswers}>Check Answers</button>
+            <div>
+                {gradingResults.map(result => (
+                    <div key={result.questionId}>
+                        Question {result.questionId}: {result.isCorrect ? 'Correct' : 'Incorrect'}
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }

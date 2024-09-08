@@ -32,6 +32,7 @@ export const multipleChoiceQuestionSchema = baseQuestionSchema.extend({
 export const checkboxesQuestionSchema = baseQuestionSchema.extend({
     type: z.literal('checkboxes'),
     choices: z.array(z.object({
+        id: z.string().uuid().default(() => uuidv4()), 
         choice: z.string(),
         isCorrect: z.boolean().optional(),
     }))
@@ -40,6 +41,7 @@ export const checkboxesQuestionSchema = baseQuestionSchema.extend({
 export const dropdownQuestionSchema = baseQuestionSchema.extend({
     type: z.literal('dropdown'),
     choices: z.array(z.object({
+        id: z.string().uuid().default(() => uuidv4()),
         choice: z.string(),
         isCorrect: z.boolean().optional(),
     }))

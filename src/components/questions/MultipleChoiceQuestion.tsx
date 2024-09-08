@@ -12,7 +12,11 @@ interface MultipleChoiceQuestionProps {
     onAnswerChange: (answer: string[]) => void;
 }
 
-const MultipleChoiceQuestion = ({ title, choices } : MultipleChoiceQuestionProps) => {
+const MultipleChoiceQuestion = ({ title, choices, onAnswerChange }: MultipleChoiceQuestionProps) => {
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        onAnswerChange([event.target.value]);
+    };
+
     return (
         <Card>
             <CardHeader>
@@ -23,7 +27,12 @@ const MultipleChoiceQuestion = ({ title, choices } : MultipleChoiceQuestionProps
                     {choices.map(choice => (
                         <li key={choice.id}>
                             <label>
-                                <input type="radio" name="multiple-choice" value={choice.id} />
+                                <input
+                                    type="radio"
+                                    name="multiple-choice"
+                                    value={choice.choice}
+                                    onChange={handleChange}
+                                />
                                 {choice.choice}
                             </label>
                         </li>

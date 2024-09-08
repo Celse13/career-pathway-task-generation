@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
 
 interface Choice {
     id: string;
@@ -12,7 +13,19 @@ interface CheckboxQuestionProps {
     onAnswerChange: (answer: string[]) => void;
 }
 
-const CheckboxQuestion = ({ title, choices, onAnswerChange } : CheckboxQuestionProps) => {
+const CheckboxQuestion = ({ title, choices, onAnswerChange }: CheckboxQuestionProps) => {
+    const [selectedChoices, setSelectedChoices] = useState<string[]>([]);
+
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { value, checked } = event.target;
+        const newSelectedChoices = checked
+            ? [...selectedChoices, value]
+            : selectedChoices.filter(choice => choice !== value);
+
+        setSelectedChoices(newSelectedChoices);
+        onAnswerChange(newSelectedChoices);
+    };
+
     return (
         <Card>
             <CardHeader>
@@ -23,7 +36,12 @@ const CheckboxQuestion = ({ title, choices, onAnswerChange } : CheckboxQuestionP
                     {choices.map(choice => (
                         <li key={choice.id}>
                             <label>
-                                <input type="checkbox" name="checkbox-choice" value={choice.id} />
+                                <input
+                                    type="checkbox"
+                                    name="checkbox-choice"
+                                    value={choice.choice}
+                                    onChange={handleChange}
+                                />
                                 {choice.choice}
                             </label>
                         </li>
