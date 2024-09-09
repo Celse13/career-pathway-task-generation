@@ -1,9 +1,20 @@
-"use server";
+// src/app/actions/actions.ts
 
 import { generateObject } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { z } from 'zod';
 import { questionSchema } from "@/db/questionSchema";
+import db from "@/database/drizzle";
+import { baseQuestions, textQuestionTable,
+    paragraphQuestionTable,
+    multipleChoiceQuestionTable,
+    checkboxesQuestionTable,
+    dropdownQuestionTable,
+    linearScaleQuestionTable,
+    fileUploadQuestionTable,
+    rangeQuestionTable,
+    ratingQuestionTable,
+    codingQuestionTable } from "@/database/questionsSchema";
 
 export const generateQuestions = async (input: string, selectedQuestionTypes: string[] = []) => {
     'use server';
@@ -43,6 +54,8 @@ export const generateQuestions = async (input: string, selectedQuestionTypes: st
             });
         });
 
+        await saveQuestionsToDB(validatedQuestions);
+
         return validatedQuestions;
 
     } catch (error) {
@@ -55,3 +68,102 @@ export const generateQuestions = async (input: string, selectedQuestionTypes: st
         }
     }
 }
+
+const saveQuestionsToDB = async (questions: any[]) => {
+    for (const question of questions) {
+        const baseQuestionData = {
+            id: question.id,
+            label: question.label,
+            title: question.title,
+            description: question.description,
+            required: question.required,
+            version: question.version,
+            orderIndex: question.orderIndex,
+            subskillId: question.subskillId,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        };
+
+        await db.insert(baseQuestions).values(baseQuestionData);
+
+        switch (question.type) {
+            case 'text':
+                await db.insert(textQuestionTable).values({
+                    id: question.id,
+                    maxLength: question.maxLength,
+                    placeholder: question.placeholder,
+                    metadata: question.metadata,
+                });
+                break;
+            case 'paragraph':
+                await db.insert(paragraphQuestionTable).values({
+                    id: question.id,
+                    maxLength: question.maxLength,
+                    placeholder: question.placeholder,
+                    metadata: question.metadata,
+                });
+                break;
+            case 'multiple-choice':
+                await db.insert(multipleChoiceQuestionTable).values({
+                    id: question.id,
+                    choices: question.choices,
+                });
+                break;
+            case 'checkboxes':
+                await db.insert(checkboxesQuestionTable).values({
+                    id: question.id,
+                    choices: question.choices,
+                });
+                break;
+            case 'dropdown':
+                await db.insert(dropdownQuestionTable).values({
+                    id: question.id,
+                    choices: question.choices,
+                });
+                break;
+            case 'linear-scale':
+                await db.insert(linearScaleQuestionTable).values({
+                    id: question.id,
+                    min: question.min,
+                    max: question.max,
+                    minLabel: question.minLabel,
+                    maxLabel: question.maxLabel,
+                    metadata: question.metadata,
+                });
+                break;
+            case 'file-upload':
+                await db.insert(fileUploadQuestionTable).values({
+                    id: question.id,
+                    allowedFileTypes: question.allowedFileTypes,
+                    maxFileSize: question.maxFileSize,
+                });
+                break;
+            case 'range':
+                await db.insert(rangeQuestionTable).values({
+                    id: question.id,
+                    min: question.min,
+                    max: question.max,
+                    step: question.step,
+                });
+                break;
+            case 'rating':
+                await db.insert(ratingQuestionTable).values({
+                    id: question.id,
+                    maxRating: question.maxRating,
+                    icon: question.icon,
+                });
+                break;
+            case 'coding':
+                await db.insert(codingQuestionTable).values({
+                    id: question.id,
+                    language: question.language,
+                    codeSnippet: question.codeSnippet,
+                    testCases: question.testCases,
+                    metadata: question.metadata,
+                });
+                break;
+            default:
+                throw new Error(`Unknown question type: ${question.type}`);
+        }
+    }
+};
