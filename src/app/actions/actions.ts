@@ -1,6 +1,5 @@
 "use server";
 
-import { questionTypes } from "@/Types/QuestionTypes";
 import { generateObject } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { z } from 'zod';
@@ -36,10 +35,7 @@ export const generateQuestions = async (input: string, selectedQuestionTypes: st
         console.log('Generated task:', task);
 
         // Validate and assign UUIDs to questions and choices using the zod schema
-        const validatedQuestions = task.map(question => {
-            const validatedQuestion = questionSchema.parse(question);
-            return validatedQuestion;
-        });
+        const validatedQuestions = task.map(question => questionSchema.parse(question));
 
         validatedQuestions.forEach((question, index) => {
             console.log(`Question ${index + 1}:`, question);
@@ -47,7 +43,7 @@ export const generateQuestions = async (input: string, selectedQuestionTypes: st
                 console.log(`  ${key}:`, value);
             });
         });
-
+        
         return validatedQuestions;
 
     } catch (error) {

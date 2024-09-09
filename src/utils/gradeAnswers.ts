@@ -1,5 +1,5 @@
 export const gradeAnswers = (userAnswers: { [key: string]: string | string[] }, questions: any[]) => {
-    const results = questions.map(question => {
+    return questions.map(question => {
         const userAnswer = userAnswers[question.id];
         let isCorrect = false;
 
@@ -42,6 +42,4 @@ export const gradeAnswers = (userAnswers: { [key: string]: string | string[] }, 
             isCorrect,
         };
     });
-
-    return results;
 };

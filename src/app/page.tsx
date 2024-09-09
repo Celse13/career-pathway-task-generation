@@ -61,6 +61,10 @@ export default function Chat() {
                 return <CheckboxQuestion title={question.title} choices={question.choices} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
             case 'dropdown':
                 return <DropdownQuestion title={question.title} choices={question.choices} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
+            case 'text':
+                return <TextQuestion title={question.title} />;
+            case 'paragraph':
+                return <ParagraphQuestion title={question.title} />;
             case 'linear-scale':
                 return <LinearScaleQuestion title={question.title} min={question.min} max={question.max} />;
             case 'date':
