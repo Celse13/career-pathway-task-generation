@@ -2,7 +2,7 @@
 
 import { type CoreMessage } from 'ai';
 import { useState, useEffect } from 'react';
-import { generateQuestions } from "@/app/actions/actions";
+import { fetchGeneratedQuestions } from "@/utils/api";
 import MultipleChoiceQuestion from '@/components/questions/MultipleChoiceQuestion';
 import CheckboxQuestion from '@/components/questions/CheckboxQuestion';
 import TextQuestion from '@/components/questions/TextQuestion';
@@ -105,13 +105,13 @@ export default function Chat() {
                     setInput('');
 
                     try {
-                        const result = await generateQuestions(input, selectedQuestionTypes);
-                        console.log('Generated questions:', result); 
-                        setQuestions(result);
+                        const result = await fetchGeneratedQuestions(input, selectedQuestionTypes);
+                        console.log('Generated questions:', result.data);
+                        setQuestions(result.data);
 
                         setMessages([
                             ...newMessages,
-                            ...result.map((question: any) => ({
+                            ...result.data.map((question: any) => ({
                                 role: 'assistant' as const,
                                 content: question,
                             })),
@@ -147,11 +147,13 @@ export default function Chat() {
                     </div>
                 )}
             </div>
-            <button onClick={checkAnswers} className="px-4 py-2 bg-green-500 text-white rounded mt-4">Check Answers</button>
+            {questions.length > 0 && (
+                <button onClick={checkAnswers} className="px-4 py-2 bg-green-500 text-white rounded mt-4">Check Answers</button>
+            )}
             <div className="mt-4 space-y-2">
                 {gradingResults.map(result => (
                     <div key={result.questionId} className="p-2 border rounded">
-                        <span className="font-bold">Question {result.questionId}:</span> 
+                        <span className="font-bold">Question {result.questionId}:</span>
                         {result.isCorrect === null ? (
                             <span className="text-gray-500 ml-2">Not applicable</span>
                         ) : result.isCorrect ? (
