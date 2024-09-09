@@ -31,6 +31,21 @@ export const gradeAnswers = (userAnswers: { [key: string]: string | string[] }, 
                     return choice.choice === dropdownAnswer && choice.isCorrect;
                 });
                 break;
+            case 'linear-scale':
+                isCorrect = userAnswer === question.correctAnswer;
+                break;
+            case 'range':
+                isCorrect = userAnswer >= question.min && userAnswer <= question.max;
+                break;
+            case 'rating':
+                isCorrect = userAnswer === question.correctRating;
+                break;
+            case 'text':
+            case 'paragraph':
+                return {
+                    questionId: question.id,
+                    isCorrect: null,
+                };
             default:
                 break;
         }

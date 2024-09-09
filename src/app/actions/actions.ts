@@ -34,7 +34,6 @@ export const generateQuestions = async (input: string, selectedQuestionTypes: st
 
         console.log('Generated task:', task);
 
-        // Validate and assign UUIDs to questions and choices using the zod schema
         const validatedQuestions = task.map(question => questionSchema.parse(question));
 
         validatedQuestions.forEach((question, index) => {
@@ -43,7 +42,7 @@ export const generateQuestions = async (input: string, selectedQuestionTypes: st
                 console.log(`  ${key}:`, value);
             });
         });
-        
+
         return validatedQuestions;
 
     } catch (error) {

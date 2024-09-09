@@ -25,7 +25,7 @@ export default function Chat() {
     const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<string[]>([]);
     const [userAnswers, setUserAnswers] = useState<{ [key: string]: string | string[] }>({});
     const [questions, setQuestions] = useState<any[]>([]);
-    const [gradingResults, setGradingResults] = useState<{ questionId: string, isCorrect: boolean }[]>([]);
+    const [gradingResults, setGradingResults] = useState<{ questionId: string, isCorrect: boolean | null }[]>([]);
 
     useEffect(() => {
         if (loading) {
@@ -106,7 +106,7 @@ export default function Chat() {
 
                     try {
                         const result = await generateQuestions(input, selectedQuestionTypes);
-                        console.log('Generated questions:', result); // Log the response
+                        console.log('Generated questions:', result); 
                         setQuestions(result);
 
                         setMessages([
@@ -129,7 +129,6 @@ export default function Chat() {
                     placeholder="Say something..."
                     onChange={e => setInput(e.target.value)}
                 />
-                <button type="submit">Submit</button>
             </form>
             <QuestionTypeSelector selectedTypes={selectedQuestionTypes} onTypeChange={handleTypeChange} />
             <div className="flex flex-col space-y-4">
@@ -148,11 +147,18 @@ export default function Chat() {
                     </div>
                 )}
             </div>
-            <button onClick={checkAnswers}>Check Answers</button>
-            <div>
+            <button onClick={checkAnswers} className="px-4 py-2 bg-green-500 text-white rounded mt-4">Check Answers</button>
+            <div className="mt-4 space-y-2">
                 {gradingResults.map(result => (
-                    <div key={result.questionId}>
-                        Question {result.questionId}: {result.isCorrect ? 'Correct' : 'Incorrect'}
+                    <div key={result.questionId} className="p-2 border rounded">
+                        <span className="font-bold">Question {result.questionId}:</span> 
+                        {result.isCorrect === null ? (
+                            <span className="text-gray-500 ml-2">Not applicable</span>
+                        ) : result.isCorrect ? (
+                            <span className="text-green-500 ml-2">Correct</span>
+                        ) : (
+                            <span className="text-red-500 ml-2">Incorrect</span>
+                        )}
                     </div>
                 ))}
             </div>
