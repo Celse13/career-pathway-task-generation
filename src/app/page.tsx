@@ -65,6 +65,8 @@ export default function Chat() {
                 return <TextQuestion title={question.title} />;
             case 'paragraph':
                 return <ParagraphQuestion title={question.title} />;
+            case 'coding':
+                return <CodingQuestion title={question.title} />;
             case 'linear-scale':
                 return <LinearScaleQuestion title={question.title} min={question.min} max={question.max} />;
             case 'date':
