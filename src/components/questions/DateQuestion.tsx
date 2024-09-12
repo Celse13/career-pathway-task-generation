@@ -2,9 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface DateQuestionProps {
     title: string;
+    onAnswerChange: (answer: string[]) => void;
 }
 
-const DateQuestion = ({ title }: DateQuestionProps) => {
+const DateQuestion = ({ title, onAnswerChange }: DateQuestionProps) => {
     return (
         <Card>
             <CardHeader>

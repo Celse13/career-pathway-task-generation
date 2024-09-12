@@ -2,9 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface FileUploadQuestionProps {
     title: string;
+    onAnswerChange: (answer: string[]) => void;
 }
 
-const FileUploadQuestion = ({ title } : FileUploadQuestionProps) => {
+const FileUploadQuestion = ({ title, onAnswerChange } : FileUploadQuestionProps) => {
     return (
         <Card>
             <CardHeader>

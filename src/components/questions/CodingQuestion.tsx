@@ -2,9 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface CodingQuestionProps {
     title: string;
+    onAnswerChange: (answer: string[]) => void;
 }
 
-const CodingQuestion = ({ title } : CodingQuestionProps) => {
+const CodingQuestion = ({ title, onAnswerChange } : CodingQuestionProps) => {
     return (
         <Card>
             <CardHeader>

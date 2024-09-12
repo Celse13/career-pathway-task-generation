@@ -4,9 +4,10 @@ interface RangeQuestionProps {
     title: string;
     min: number;
     max: number;
+    onAnswerChange: (answer: string[]) => void;
 }
 
-const RangeQuestion = ({ title, min, max } : RangeQuestionProps) => {
+const RangeQuestion = ({ title, min, max, onAnswerChange } : RangeQuestionProps) => {
     return (
         <Card>
             <CardHeader>

@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { questionSchema } from "@/db/questionSchema";
 import {generateQuestions} from "@/app/actions/actions";
+
+
 export async function POST(req: NextRequest) {
     try {
         const { input, selectedQuestionTypes } = await req.json();

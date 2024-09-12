@@ -4,9 +4,10 @@ interface LinearScaleQuestionProps {
     title: string;
     min: number;
     max: number;
+    onAnswerChange: (answer: string[]) => void;
 }
 
-const LinearScaleQuestion = ({ title, min, max } : LinearScaleQuestionProps) => {
+const LinearScaleQuestion = ({ title, min, max, onAnswerChange } : LinearScaleQuestionProps) => {
     return (
         <Card>
             <CardHeader>

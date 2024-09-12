@@ -3,9 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 interface RatingQuestionProps {
     title: string;
     maxRating: number;
+    onAnswerChange: (answer: string[]) => void;
 }
 
-const RatingQuestion = ({ title, maxRating } : RatingQuestionProps) => {
+const RatingQuestion = ({ title, maxRating, onAnswerChange } : RatingQuestionProps) => {
     return (
         <Card>
             <CardHeader>

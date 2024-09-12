@@ -2,7 +2,7 @@
 
 import { type CoreMessage } from 'ai';
 import { useState, useEffect } from 'react';
-import { fetchGeneratedQuestions } from "@/utils/api";
+import { fetchGeneratedQuestions, gradeAnswers } from "@/utils/api";
 import MultipleChoiceQuestion from '@/components/questions/MultipleChoiceQuestion';
 import CheckboxQuestion from '@/components/questions/CheckboxQuestion';
 import TextQuestion from '@/components/questions/TextQuestion';
@@ -15,7 +15,6 @@ import FileUploadQuestion from '@/components/questions/FileUploadQuestion';
 import RangeQuestion from '@/components/questions/RangeQuestion';
 import RatingQuestion from '@/components/questions/RatingQuestion';
 import QuestionTypeSelector from '@/components/QuestionTypeSelector';
-import { gradeAnswers } from '@/utils/gradeAnswers';
 
 export default function Chat() {
     const [messages, setMessages] = useState<CoreMessage[]>([]);
@@ -25,7 +24,7 @@ export default function Chat() {
     const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<string[]>([]);
     const [userAnswers, setUserAnswers] = useState<{ [key: string]: string | string[] }>({});
     const [questions, setQuestions] = useState<any[]>([]);
-    const [gradingResults, setGradingResults] = useState<{ questionId: string, isCorrect: boolean | null }[]>([]);
+    const [gradingResults, setGradingResults] = useState<{ questionId: string, isCorrect: boolean | null, automatedResponse?: string }[]>([]);
 
     useEffect(() => {
         if (loading) {
@@ -45,6 +44,16 @@ export default function Chat() {
         );
     };
 
+    const checkAnswers = async () => {
+        console.log('User Answers:', userAnswers);
+        console.log('Questions:', questions);
+
+        // Ensure that all questions have corresponding answers
+        const results = await gradeAnswers(userAnswers, questions);
+        setGradingResults(results);
+        console.log('Grading results:', results);
+    };
+
     const handleAnswerChange = (questionId: string, answer: string | string[]) => {
         console.log(`Updating answer for question ${questionId}:`, answer);
         setUserAnswers((prevAnswers) => ({
@@ -62,32 +71,24 @@ export default function Chat() {
             case 'dropdown':
                 return <DropdownQuestion title={question.title} choices={question.choices} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
             case 'text':
-                return <TextQuestion title={question.title} />;
+                return <TextQuestion title={question.title} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
             case 'paragraph':
-                return <ParagraphQuestion title={question.title} />;
+                return <ParagraphQuestion title={question.title} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
             case 'coding':
-                return <CodingQuestion title={question.title} />;
+                return <CodingQuestion title={question.title} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
             case 'linear-scale':
-                return <LinearScaleQuestion title={question.title} min={question.min} max={question.max} />;
+                return <LinearScaleQuestion title={question.title} min={question.min} max={question.max} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
             case 'date':
-                return <DateQuestion title={question.title} />;
+                return <DateQuestion title={question.title} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
             case 'file-upload':
-                return <FileUploadQuestion title={question.title} />;
+                return <FileUploadQuestion title={question.title} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
             case 'range':
-                return <RangeQuestion title={question.title} min={question.min} max={question.max} />;
+                return <RangeQuestion title={question.title} min={question.min} max={question.max} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
             case 'rating':
-                return <RatingQuestion title={question.title} maxRating={question.maxRating} />;
+                return <RatingQuestion title={question.title} maxRating={question.maxRating} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
             default:
                 return null;
         }
-    };
-
-    const checkAnswers = () => {
-        console.log('User Answers:', userAnswers);
-        console.log('Questions:', questions);
-        const results = gradeAnswers(userAnswers, questions);
-        setGradingResults(results);
-        console.log('Grading results:', results);
     };
 
     return (
@@ -148,18 +149,22 @@ export default function Chat() {
                 )}
             </div>
             {questions.length > 0 && (
-                <button onClick={checkAnswers} className="px-4 py-2 bg-green-500 text-white rounded mt-4">Check Answers</button>
+                <button onClick={checkAnswers} className="px-4 py-2 bg-green-500 text-white rounded mt-4">Check
+                    Answers</button>
             )}
             <div className="mt-4 space-y-2">
-                {gradingResults.map(result => (
-                    <div key={result.questionId} className="p-2 border rounded">
-                        <span className="font-bold">Question {result.questionId}:</span>
-                        {result.isCorrect === null ? (
+                {gradingResults?.map(result => (
+                    <div key={result?.questionId} className="p-2 border rounded">
+                        <span className="font-bold">Question {result?.questionId}:</span>
+                        {result?.isCorrect === null ? (
                             <span className="text-gray-500 ml-2">Not applicable</span>
-                        ) : result.isCorrect ? (
+                        ) : result?.isCorrect ? (
                             <span className="text-green-500 ml-2">Correct</span>
                         ) : (
                             <span className="text-red-500 ml-2">Incorrect</span>
+                        )}
+                        {result?.automatedResponse && (
+                            <div className="mt-2 text-gray-700">{result?.automatedResponse}</div>
                         )}
                     </div>
                 ))}
