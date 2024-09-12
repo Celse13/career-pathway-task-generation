@@ -96,6 +96,14 @@ export const codingQuestionTable = pgTable('coding_test_cases', {
     metadata: json('metadata'),
 });
 
+export const answersSchema = pgTable('answers', {
+    id: uuid('id').primaryKey(),
+    questionId: uuid('question_id').references(() => baseQuestions.id).notNull(),
+    isCorrect: boolean('is_correct').default(false),
+    automatedResponse: text('automated_response'),
+});
+
+
 // Relations
 export const textQuestionRelations = relations(textQuestionTable, ({ one }) => ({
     baseQuestion: one(baseQuestions, {
@@ -163,6 +171,13 @@ export const ratingQuestionRelations = relations(ratingQuestionTable, ({ one }) 
 export const codingQuestionRelations = relations(codingQuestionTable, ({ one }) => ({
     baseQuestion: one(baseQuestions, {
         fields: [codingQuestionTable.id],
+        references: [baseQuestions.id],
+    }),
+}));
+
+export const answersRelations = relations(answersSchema, ({ one }) => ({
+    question: one(baseQuestions, {
+        fields: [answersSchema.questionId],
         references: [baseQuestions.id],
     }),
 }));

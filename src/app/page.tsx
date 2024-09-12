@@ -19,12 +19,13 @@ import QuestionTypeSelector from '@/components/QuestionTypeSelector';
 export default function Chat() {
     const [messages, setMessages] = useState<CoreMessage[]>([]);
     const [input, setInput] = useState('');
+
     const [loading, setLoading] = useState(false);
     const [dots, setDots] = useState(1);
     const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<string[]>([]);
     const [userAnswers, setUserAnswers] = useState<{ [key: string]: string | string[] }>({});
     const [questions, setQuestions] = useState<any[]>([]);
-    const [gradingResults, setGradingResults] = useState<{ questionId: string, isCorrect: boolean | null, automatedResponse?: string }[]>([]);
+    const [gradingResults, setGradingResults] = useState<{ questionId: string, isCorrect: boolean | null, automatedResponse?: string, score?: number }[]>([]);
 
     useEffect(() => {
         if (loading) {
@@ -47,11 +48,24 @@ export default function Chat() {
     const checkAnswers = async () => {
         console.log('User Answers:', userAnswers);
         console.log('Questions:', questions);
-
-        // Ensure that all questions have corresponding answers
+    
         const results = await gradeAnswers(userAnswers, questions);
-        setGradingResults(results);
         console.log('Grading results:', results);
+    
+        // Access the data property of the results object
+        const resultsArray = Array.isArray(results.data) ? results.data : [results.data];
+    
+        let totalScore = 0;
+    
+        const scoredResults = resultsArray.map((result: { questionId: string, isCorrect: boolean | null, automatedResponse?: string, score?: number }) => {
+            const score = result.score || 0;
+            totalScore += score;
+            console.log(`Question ${result.questionId} Score: ${score}`);
+            return { ...result, score };
+        });
+    
+        setGradingResults(scoredResults);
+        console.log('Total Score:', totalScore);
     };
 
     const handleAnswerChange = (questionId: string, answer: string | string[]) => {
@@ -99,7 +113,7 @@ export default function Chat() {
                     setLoading(true);
                     const newMessages: CoreMessage[] = [
                         ...messages,
-                        { content: input, role: 'user' },
+                        {content: input, role: 'user'},
                     ];
 
                     setMessages(newMessages);
@@ -131,7 +145,7 @@ export default function Chat() {
                     onChange={e => setInput(e.target.value)}
                 />
             </form>
-            <QuestionTypeSelector selectedTypes={selectedQuestionTypes} onTypeChange={handleTypeChange} />
+            <QuestionTypeSelector selectedTypes={selectedQuestionTypes} onTypeChange={handleTypeChange}/>
             <div className="flex flex-col space-y-4">
                 {messages.map((m, i) => (
                     <div key={i} className="whitespace-pre-wrap">
@@ -148,26 +162,34 @@ export default function Chat() {
                     </div>
                 )}
             </div>
-            {questions.length > 0 && (
-                <button onClick={checkAnswers} className="px-4 py-2 bg-green-500 text-white rounded mt-4">Check
-                    Answers</button>
-            )}
-            <div className="mt-4 space-y-2">
-                {gradingResults?.map(result => (
-                    <div key={result?.questionId} className="p-2 border rounded">
-                        <span className="font-bold">Question {result?.questionId}:</span>
-                        {result?.isCorrect === null ? (
-                            <span className="text-gray-500 ml-2">Not applicable</span>
-                        ) : result?.isCorrect ? (
-                            <span className="text-green-500 ml-2">Correct</span>
-                        ) : (
-                            <span className="text-red-500 ml-2">Incorrect</span>
-                        )}
-                        {result?.automatedResponse && (
-                            <div className="mt-2 text-gray-700">{result?.automatedResponse}</div>
-                        )}
+            <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
+                {/* Existing form and question rendering code */}
+                {questions.length > 0 && (
+                    <button onClick={checkAnswers} className="px-4 py-2 bg-green-500 text-white rounded mt-4">
+                        Check Answers
+                    </button>
+                )}
+                <div className="mt-4 space-y-2">
+                    {gradingResults?.map(result => (
+                        <div key={result?.questionId} className="p-2 border rounded">
+                            <span className="font-bold">Question {result?.questionId}:</span>
+                            {result?.isCorrect === null ? (
+                                <span className="text-gray-500 ml-2">Not applicable</span>
+                            ) : result?.isCorrect ? (
+                                <span className="text-green-500 ml-2">Correct</span>
+                            ) : (
+                                <span className="text-red-500 ml-2">Incorrect</span>
+                            )}
+                            {result?.automatedResponse && (
+                                <div className="mt-2 text-gray-700">{result?.automatedResponse}</div>
+                            )}
+                            <div className="mt-2 text-gray-700">Score: {result?.score} / 5</div>
+                        </div>
+                    ))}
+                    <div className="mt-4 text-xl font-bold">
+                        Total Score: {gradingResults.reduce((acc, result) => acc + (result?.score || 0), 0)} / {gradingResults.length * 5}
                     </div>
-                ))}
+                </div>
             </div>
         </div>
     );

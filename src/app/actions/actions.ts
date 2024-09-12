@@ -1,9 +1,11 @@
 import { generateObject } from "ai";
+import { openai } from '@ai-sdk/openai';
 import { anthropic } from "@ai-sdk/anthropic";
 import { z } from 'zod';
 import { questionSchema } from "@/db/questionSchema";
 import db from "@/database/drizzle";
-import { baseQuestions, textQuestionTable,
+import {
+    baseQuestions, textQuestionTable,
     paragraphQuestionTable,
     multipleChoiceQuestionTable,
     checkboxesQuestionTable,
@@ -12,7 +14,8 @@ import { baseQuestions, textQuestionTable,
     fileUploadQuestionTable,
     rangeQuestionTable,
     ratingQuestionTable,
-    codingQuestionTable } from "@/database/questionsSchema";
+    codingQuestionTable
+} from "@/database/questionsSchema";
 
 export const generateQuestions = async (input: string, selectedQuestionTypes: string[] = []) => {
     'use server';
@@ -28,7 +31,7 @@ export const generateQuestions = async (input: string, selectedQuestionTypes: st
         `;
 
         const { object: task } = await generateObject({
-            model: anthropic('claude-3-5-sonnet-20240620'),
+            model: anthropic("claude-3-5-sonnet-20240620"),
             prompt: prompt,
             system: `
                  You are a question generator.
@@ -166,94 +169,102 @@ const saveQuestionsToDB = async (questions: any[]) => {
     }
 };
 
-const answerShape = [
-    {
-        "questionId": "d33c64b2-9e68-4b2e-9b32-bc70201cafc5",
-        "isCorrect": true,
-        "automatedResponse": "Correct! 'Procedural Components' is not a type of React component. The main types of React components are Functional Components, Class Components, and Higher-Order Components."
-    },
-    {
-        "questionId": "d14d9f44-db56-48ad-86b8-d98decdc19fe",
-        "isCorrect": false,
-        "automatedResponse": "Incorrect. The correct answer is 'useEffect'."
-    },
-    {
-        "questionId": "b71150f0-0298-4052-b4ab-517fa2072b52",
-        "isCorrect": null,
-        "automatedResponse": "Correct! 'componentDidMount', 'componentWillUpdate', and 'componentWillUnmount' are React lifecycle methods."
-    }
-];
-
-// export const gradeAnswers = async (userAnswers: { [key: string]: string | string[] }, questions: any[]) => {
-//     console.log('questions from the client', userAnswers);
-//     const prompt = `
-//         You are an AI grader. Grade the following user answers based on the provided questions: ${JSON.stringify({ userAnswers, questions })}.
-//         Return the results as an array of objects, each conforming to the format ${JSON.stringify(answerShape)}.
-//         If the question type is subjective (e.g., text, paragraph), return null for "isCorrect" and provide an "automatedResponse".
-//         Ensure that the final output is an array, even if there is only one answer.
-//     `;
-//
-//     const system = `
-//         You are an AI grader.
-//         Grade the user answers based on the provided questions.
-//         Ensure that the output is an array of objects that match the format ${JSON.stringify(answerShape)}.
-//     `;
-//
-//     const { object: gradingResults } = await generateObject({
-//         model: anthropic('claude-3-5-sonnet-20240620'),
-//         output: 'array',
-//         schema: z.array(z.object({
-//             questionId: z.string(),
-//             isCorrect: z.boolean().nullable(),
-//             automatedResponse: z.string().optional(),
-//         })),
-//         prompt: prompt,
-//         system: system,
-//     });
-//
-//     // Ensure the response is an array
-//     const validatedResults = Array.isArray(gradingResults) ? gradingResults : [gradingResults];
-//
-//     // Log the results for debugging
-//     console.log('Grading Results:', validatedResults);
-//
-//     return validatedResults;
-// }
 
 
+const answerShape = z.object({
+    questionId: z.string(),
+    isCorrect: z.boolean().nullable(),
+    automatedResponse: z.string().optional(),
+    score: z.number().optional(),
+});
 
 export const gradeAnswers = async (userAnswers: { [key: string]: string | string[] }, questions: any[]) => {
     console.log('questions from the client', userAnswers);
+
+    const results = await Promise.all(questions.map(async question => {
+        const userAnswer = userAnswers[question.id];
+
+        let isCorrect = false;
+        let score = 0;
+        let automatedResponse = '';
+
+        switch (question.type) {
+            case 'multiple-choice':
+            case 'dropdown':
+                const correctChoice = question.choices.find((choice: any) => choice.isCorrect);
+                isCorrect = userAnswer === correctChoice?.choice;
+                score = isCorrect ? 5 : 0;
+                automatedResponse = isCorrect ? 'Correct!' : `Incorrect. The correct answer is '${correctChoice?.choice}'.`;
+                break;
+
+            case 'checkboxes':
+                const correctAnswers = question.choices.filter((choice: any) => choice.isCorrect).map((choice: any) => choice.choice);
+                const userAnswersArray = Array.isArray(userAnswer) ? userAnswer : [userAnswer];
+                const correctSelections = userAnswersArray.filter(answer => correctAnswers.includes(answer)).length;
+                isCorrect = correctSelections === correctAnswers.length;
+
+                if (correctAnswers.length > 0) {
+                    score = (correctSelections / correctAnswers.length) * 5; // Partial points based on correct selections
+                } else {
+                    score = 0;
+                }
+
+                automatedResponse = isCorrect
+                    ? 'Correct!'
+                    : `Incorrect. The correct answers are '${correctAnswers.join(', ')}'. You selected '${userAnswersArray.join(', ')}'.`;
+                break;
+
+            case 'text':
+            case 'paragraph':
+                const automatedResponseText = question.metadata?.automatedResponse || '';
+                const aiGradingResult = await gradeSubjectiveAnswer(Array.isArray(userAnswer) ? userAnswer.join(', ') : userAnswer, automatedResponseText);
+                isCorrect = aiGradingResult.isCorrect;
+                score = aiGradingResult.score;
+                automatedResponse = aiGradingResult.automatedResponse;
+                break;
+
+            default:
+                throw new Error(`Unknown question type: ${question.type}`);
+        }
+
+        return {
+            questionId: question.id,
+            isCorrect,
+            automatedResponse,
+            score,
+        };
+    }));
+
+    console.log('Grading Results:', results);
+    return results;
+};
+
+const gradeSubjectiveAnswer = async (userAnswer: string, expectedAnswer: string) => {
     const prompt = `
-        You are an AI grader. Grade the following user answers based on the provided questions: ${JSON.stringify({ userAnswers, questions })}.
-        Return the results as an array of objects, each conforming to the format ${JSON.stringify(answerShape)}.
-        If the question type is subjective (e.g., text, paragraph), return null for "isCorrect" and provide an "automatedResponse".
-        Ensure that the final output is an array, even if there is only one answer.
-    `;
+    You are an AI grader. Evaluate the following user answer based on the expected answer:
+    User Answer: "${userAnswer}"
+    Expected Answer: "${expectedAnswer}"
+    Provide a score out of 5 and indicate if the answer is correct. Include an explanation in the automated response.
+  `;
 
     const system = `
-        You are an AI grader.
-        Grade the user answers based on the provided questions.
-        Ensure that the output is an array of objects that match the format ${JSON.stringify(answerShape)}.
-    `;
+    You are an AI grader.
+    Evaluate the user answer based on the expected answer.
+    Provide a score out of 5 and indicate if the answer is correct.
+    Include an explanation in the automated response.
+  `;
 
-    const { object: gradingResults } = await generateObject({
-        model: anthropic('claude-3-5-sonnet-20240620'),
-        output: 'array',
+    const { object: gradingResult } = await generateObject({
+        model: anthropic("claude-3-5-sonnet-20240620"),
+        output: 'object',
         schema: z.object({
-            questionId: z.string(),
-            isCorrect: z.boolean().nullable(),
-            automatedResponse: z.string().optional(),
+            isCorrect: z.boolean(),
+            score: z.number(),
+            automatedResponse: z.string(),
         }),
         prompt: prompt,
         system: system,
     });
 
-    // Ensure the response is an array
-    const validatedResults = Array.isArray(gradingResults) ? gradingResults : [gradingResults];
-
-    // Log the results for debugging
-    console.log('Grading Results:', validatedResults);
-
-    return validatedResults;
-}
+    return gradingResult;
+};
