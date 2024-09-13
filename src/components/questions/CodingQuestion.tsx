@@ -7,7 +7,7 @@ interface CodingQuestionProps {
 
 const CodingQuestion = ({ title, onAnswerChange } : CodingQuestionProps) => {
     return (
-        <Card>
+        <Card className="w-full">
             <CardHeader>
                 <CardTitle>{title}</CardTitle>
             </CardHeader>

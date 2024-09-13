@@ -8,7 +8,7 @@ interface QuestionTypeSelectorProps {
 
 const QuestionTypeSelector = ({ selectedTypes, onTypeChange }: QuestionTypeSelectorProps) => {
     return (
-        <div className="p-4 bg-white rounded shadow-md">
+        <div className="p-4 bg-white rounded shadow-md w-full">
             <h3 className="text-lg font-semibold mb-4">Select Question Types</h3>
             <div className="grid grid-cols-2 gap-4">
                 {Object.keys(questionTypes).map((type) => (

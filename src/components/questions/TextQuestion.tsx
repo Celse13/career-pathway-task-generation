@@ -7,7 +7,7 @@ interface TextQuestionProps {
 
 const TextQuestion = ({ title, onAnswerChange }: TextQuestionProps) => {
     return (
-        <Card className="shadow-lg rounded-lg border border-gray-200">
+        <Card className="shadow-lg rounded-lg border border-gray-200 w-full|">
             <CardHeader className="bg-gray-100 border-b border-gray-200">
                 <CardTitle className="text-lg font-semibold text-gray-700">{title}</CardTitle>
             </CardHeader>

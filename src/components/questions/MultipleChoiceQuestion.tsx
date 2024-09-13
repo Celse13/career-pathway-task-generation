@@ -8,15 +8,16 @@ interface Choice {
 }
 
 interface MultipleChoiceQuestionProps {
+    questionId: string;
     title: string;
     choices: {
         choice: string;
         isCorrect?: boolean;
     }[];
-    onAnswerChange: (answer: string) => void;
+    onAnswerChange: (questionId: string, answer: string) => void;
 }
 
-const MultipleChoiceQuestion = ({ title, choices: initialChoices, onAnswerChange }: MultipleChoiceQuestionProps) => {
+const MultipleChoiceQuestion = ({ questionId, title, choices: initialChoices, onAnswerChange }: MultipleChoiceQuestionProps) => {
     const [choices, setChoices] = useState<Choice[]>([]);
     const [selectedChoice, setSelectedChoice] = useState<string>('');
 
@@ -37,12 +38,12 @@ const MultipleChoiceQuestion = ({ title, choices: initialChoices, onAnswerChange
         const choice = choices.find(choice => choice.id === selectedId);
         if (choice) {
             console.log(`Selected Choice ID: ${choice.id}, Choice: ${choice.choice}`);
-            onAnswerChange(choice.choice);
+            onAnswerChange(questionId, choice.choice);
         }
     };
 
     return (
-        <Card className="shadow-lg rounded-lg border border-gray-200">
+        <Card className="shadow-lg rounded-lg border border-gray-200 w-full">
             <CardHeader className="bg-gray-100 border-b border-gray-200">
                 <CardTitle className="text-lg font-semibold text-gray-700">{title}</CardTitle>
             </CardHeader>
@@ -52,7 +53,7 @@ const MultipleChoiceQuestion = ({ title, choices: initialChoices, onAnswerChange
                         <li key={choice.id} className="flex items-center space-x-2">
                             <input
                                 type="radio"
-                                name="multiple-choice"
+                                name={`multiple-choice-${questionId}`}
                                 value={choice.id}
                                 checked={selectedChoice === choice.id}
                                 onChange={handleChange}

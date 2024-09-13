@@ -19,7 +19,6 @@ import URLQuestion from "@/components/questions/UrlQuestion";
 export default function Chat() {
     const [messages, setMessages] = useState<CoreMessage[]>([]);
     const [input, setInput] = useState('');
-
     const [loading, setLoading] = useState(false);
     const [dots, setDots] = useState(1);
     const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<string[]>([]);
@@ -52,7 +51,6 @@ export default function Chat() {
         const results = await gradeAnswers(userAnswers, questions);
         console.log('Grading results:', results);
 
-        // Access the data property of the results object
         const resultsArray = Array.isArray(results.data) ? results.data : [results.data];
 
         let totalScore = 0;
@@ -79,7 +77,7 @@ export default function Chat() {
     const renderQuestion = (question: any) => {
         switch (question.type) {
             case 'multiple-choice':
-                return <MultipleChoiceQuestion title={question.title} choices={question.choices} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
+                return <MultipleChoiceQuestion questionId={question.id} title={question.title} choices={question.choices} onAnswerChange={handleAnswerChange} />;
             case 'checkboxes':
                 return <CheckboxQuestion title={question.title} choices={question.choices} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
             case 'dropdown':
@@ -106,14 +104,14 @@ export default function Chat() {
     };
 
     return (
-        <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
+        <div className="flex flex-col w-full max-w-2xl px-4 py-24 mx-auto">
             <form
                 onSubmit={async e => {
                     e.preventDefault();
                     setLoading(true);
                     const newMessages: CoreMessage[] = [
                         ...messages,
-                        {content: input, role: 'user'},
+                        { content: input, role: 'user' },
                     ];
 
                     setMessages(newMessages);
@@ -145,11 +143,13 @@ export default function Chat() {
                     onChange={e => setInput(e.target.value)}
                 />
             </form>
-            <QuestionTypeSelector selectedTypes={selectedQuestionTypes} onTypeChange={handleTypeChange}/>
+            <div className='flex justify-center'>
+                <QuestionTypeSelector selectedTypes={selectedQuestionTypes} onTypeChange={handleTypeChange} />
+            </div>
             <div className="flex flex-col space-y-4">
                 {messages.map((m, i) => (
-                    <div key={i} className="whitespace-pre-wrap">
-                        {m.role === 'user' ? 'User: ' : 'AI: '}
+                    <div key={i} className="my-4">
+                        {m.role === 'user' ? `User ${i + 1}: ` : `Question ${i + 1} `}
                         {typeof m.content === 'string' ? m.content : renderQuestion(m.content)}
                     </div>
                 ))}
@@ -163,7 +163,6 @@ export default function Chat() {
                 )}
             </div>
             <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
-                {/* Existing form and question rendering code */}
                 {questions.length > 0 && (
                     <button onClick={checkAnswers} className="px-4 py-2 bg-green-500 text-white rounded mt-4">
                         Check Answers
