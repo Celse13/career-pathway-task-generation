@@ -6,7 +6,7 @@ import {
     dropdownQuestionSchema, fileUploadQuestionSchema,
     linearScaleQuestionSchema,
     multipleChoiceQuestionSchema,
-    paragraphQuestionSchema, rangeQuestionSchema, ratingQuestionSchema
+    paragraphQuestionSchema, rangeQuestionSchema, URLQuestionSchema
 } from "@/db/questionsSchema/allQuestionsTypes";
 
 
@@ -21,6 +21,6 @@ export const questionSchema = z.union([
     dateQuestionSchema,
     fileUploadQuestionSchema,
     rangeQuestionSchema,
-    ratingQuestionSchema,
+    URLQuestionSchema,
     codingQuestionSchema,
 ]);

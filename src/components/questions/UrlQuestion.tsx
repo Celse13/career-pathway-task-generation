@@ -1,13 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-interface DateQuestionProps {
+interface URLQuestionProps {
     title: string;
-    onAnswerChange: (answer: string[]) => void;
+    onAnswerChange: (answer: string) => void;
 }
 
-const DateQuestion = ({ title, onAnswerChange }: DateQuestionProps) => {
+const URLQuestion = ({ title, onAnswerChange }: URLQuestionProps) => {
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        onAnswerChange([event.target.value]);
+        onAnswerChange(event.target.value);
     };
 
     return (
@@ -17,13 +17,14 @@ const DateQuestion = ({ title, onAnswerChange }: DateQuestionProps) => {
             </CardHeader>
             <CardContent className="p-4">
                 <input
-                    type="date"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    type="url"
+                    placeholder="Type your answer here..."
                     onChange={handleChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
             </CardContent>
         </Card>
     );
 };
 
-export default DateQuestion;
+export default URLQuestion;

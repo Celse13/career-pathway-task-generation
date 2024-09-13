@@ -27,23 +27,22 @@ const CheckboxQuestion = ({ title, choices, onAnswerChange }: CheckboxQuestionPr
     };
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>{title}</CardTitle>
+        <Card className="shadow-lg rounded-lg border border-gray-200">
+            <CardHeader className="bg-gray-100 border-b border-gray-200">
+                <CardTitle className="text-lg font-semibold text-gray-700">{title}</CardTitle>
             </CardHeader>
-            <CardContent>
-                <ul>
+            <CardContent className="p-4">
+                <ul className="space-y-2">
                     {choices.map(choice => (
-                        <li key={choice.id}>
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    name="checkbox-choice"
-                                    value={choice.choice}
-                                    onChange={handleChange}
-                                />
-                                {choice.choice}
-                            </label>
+                        <li key={choice.id} className="flex items-center space-x-2">
+                            <input
+                                type="checkbox"
+                                name="checkbox-choice"
+                                value={choice.choice}
+                                onChange={handleChange}
+                                className="form-checkbox h-5 w-5 text-blue-600"
+                            />
+                            <label className="text-gray-700">{choice.choice}</label>
                         </li>
                     ))}
                 </ul>

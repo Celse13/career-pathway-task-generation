@@ -42,12 +42,16 @@ const DropdownQuestion = ({ title, choices: initialChoices, onAnswerChange }: Dr
     };
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>{title}</CardTitle>
+        <Card className="shadow-lg rounded-lg border border-gray-200">
+            <CardHeader className="bg-gray-100 border-b border-gray-200">
+                <CardTitle className="text-lg font-semibold text-gray-700">{title}</CardTitle>
             </CardHeader>
-            <CardContent>
-                <select className="w-full p-2 border rounded" value={selectedChoice} onChange={handleChange}>
+            <CardContent className="p-4">
+                <select
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={selectedChoice}
+                    onChange={handleChange}
+                >
                     <option value="" disabled>
                         Please select an option
                     </option>

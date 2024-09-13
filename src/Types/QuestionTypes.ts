@@ -8,7 +8,7 @@ export const questionTypes = {
     date: 'Date',
     fileUpload: 'File Upload',
     range: 'Range',
-    rating: 'Rating',
+    url: 'URL',
     coding: 'Coding',
 } as const;
 

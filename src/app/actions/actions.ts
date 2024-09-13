@@ -14,7 +14,8 @@ import {
     fileUploadQuestionTable,
     rangeQuestionTable,
     ratingQuestionTable,
-    codingQuestionTable
+    codingQuestionTable, dateQuestionTable,
+    URLQuestionTable
 } from "@/database/questionsSchema";
 
 export const generateQuestions = async (input: string, selectedQuestionTypes: string[] = []) => {
@@ -162,6 +163,20 @@ const saveQuestionsToDB = async (questions: any[]) => {
                     testCases: question.testCases,
                     metadata: question.metadata,
                 });
+                break;
+            case 'date':
+                await db.insert(dateQuestionTable).values({
+                    id: question.id,
+                    minDate: question.minDate,
+                    maxDate: question.maxDate,
+                    metadata: question.metadata,
+            });
+            case 'url':
+                await db.insert(URLQuestionTable).values({
+                    id: question.id,
+                    allowedFileTypes: question.allowedFileTypes,
+                    maxFileSize: question.maxFileSize,
+            });
                 break;
             default:
                 throw new Error(`Unknown question type: ${question.type}`);

@@ -13,8 +13,8 @@ import LinearScaleQuestion from '@/components/questions/LinearScaleQuestion';
 import DateQuestion from '@/components/questions/DateQuestion';
 import FileUploadQuestion from '@/components/questions/FileUploadQuestion';
 import RangeQuestion from '@/components/questions/RangeQuestion';
-import RatingQuestion from '@/components/questions/RatingQuestion';
 import QuestionTypeSelector from '@/components/QuestionTypeSelector';
+import URLQuestion from "@/components/questions/UrlQuestion";
 
 export default function Chat() {
     const [messages, setMessages] = useState<CoreMessage[]>([]);
@@ -48,22 +48,22 @@ export default function Chat() {
     const checkAnswers = async () => {
         console.log('User Answers:', userAnswers);
         console.log('Questions:', questions);
-    
+
         const results = await gradeAnswers(userAnswers, questions);
         console.log('Grading results:', results);
-    
+
         // Access the data property of the results object
         const resultsArray = Array.isArray(results.data) ? results.data : [results.data];
-    
+
         let totalScore = 0;
-    
+
         const scoredResults = resultsArray.map((result: { questionId: string, isCorrect: boolean | null, automatedResponse?: string, score?: number }) => {
             const score = result.score || 0;
             totalScore += score;
             console.log(`Question ${result.questionId} Score: ${score}`);
             return { ...result, score };
         });
-    
+
         setGradingResults(scoredResults);
         console.log('Total Score:', totalScore);
     };
@@ -98,8 +98,8 @@ export default function Chat() {
                 return <FileUploadQuestion title={question.title} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
             case 'range':
                 return <RangeQuestion title={question.title} min={question.min} max={question.max} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
-            case 'rating':
-                return <RatingQuestion title={question.title} maxRating={question.maxRating} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
+            case 'url':
+                return <URLQuestion title={question.title} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
             default:
                 return null;
         }

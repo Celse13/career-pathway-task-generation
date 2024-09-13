@@ -77,11 +77,10 @@ export const rangeQuestionSchema = baseQuestionSchema.extend({
     metadata: metadataSchema,
 });
 
-export const ratingQuestionSchema = baseQuestionSchema.extend({
-    type: z.literal('rating'),
-    maxRating: z.number(),
-    icon: z.string().optional(),
-    metadata: metadataSchema,
+export const URLQuestionSchema = baseQuestionSchema.extend({
+    type: z.literal('url'),
+    allowedFileTypes: z.array(z.string()).optional(),
+    maxFileSize: z.number().optional(),
 });
 
 export const codingQuestionSchema = baseQuestionSchema.extend({

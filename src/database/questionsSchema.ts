@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, integer, json, boolean, text, uuid, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, serial, varchar, integer, json, boolean, text, uuid, timestamp, date } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // Base Questions Table
@@ -96,12 +96,28 @@ export const codingQuestionTable = pgTable('coding_test_cases', {
     metadata: json('metadata'),
 });
 
+export const dateQuestionTable = pgTable('date_questions', {
+    id: uuid('id').primaryKey().references(() => baseQuestions.id),
+    minDate: date('min_date').notNull(),
+    maxDate: date('max_date').notNull(),
+    metadata: json('metadata'),
+});
+
+
+export const URLQuestionTable = pgTable('url_questions', {
+    id: uuid('id').primaryKey().references(() => baseQuestions.id),
+    allowedFileTypes: json('allowed_file_types').$type<Array<string>>(),
+    maxFileSize: integer('max_file_size'),
+});
+
+
 export const answersSchema = pgTable('answers', {
     id: uuid('id').primaryKey(),
     questionId: uuid('question_id').references(() => baseQuestions.id).notNull(),
     isCorrect: boolean('is_correct').default(false),
     automatedResponse: text('automated_response'),
 });
+
 
 
 // Relations
@@ -175,9 +191,25 @@ export const codingQuestionRelations = relations(codingQuestionTable, ({ one }) 
     }),
 }));
 
+
+export const dateQuestionRelations = relations(dateQuestionTable, ({ one }) => ({
+    baseQuestion: one(baseQuestions, {
+        fields: [dateQuestionTable.id],
+        references: [baseQuestions.id],
+    }),
+}));
+
 export const answersRelations = relations(answersSchema, ({ one }) => ({
     question: one(baseQuestions, {
         fields: [answersSchema.questionId],
         references: [baseQuestions.id],
     }),
 }));
+
+export const URLRelations = relations(URLQuestionTable, ({ one }) => ({
+    question: one(baseQuestions, {
+        fields: [URLQuestionTable.id],
+        references: [baseQuestions.id],
+    }),
+}));
+
