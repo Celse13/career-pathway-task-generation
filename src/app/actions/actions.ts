@@ -219,7 +219,7 @@ export const gradeAnswers = async (userAnswers: { [key: string]: string | string
                 isCorrect = correctSelections === correctAnswers.length;
 
                 if (correctAnswers.length > 0) {
-                    score = (correctSelections / correctAnswers.length) * 5; // Partial points based on correct selections
+                    score = (correctSelections / correctAnswers.length) * 5;
                 } else {
                     score = 0;
                 }

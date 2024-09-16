@@ -25,7 +25,6 @@ export default function QuestionsPage() {
     const router = useRouter();
 
     useEffect(() => {
-        // Retrieve questions from localStorage or any state management solution
         const storedQuestions = localStorage.getItem('generatedQuestions');
         if (storedQuestions) {
             setQuestions(JSON.parse(storedQuestions));

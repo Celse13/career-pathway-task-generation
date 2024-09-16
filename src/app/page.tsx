@@ -16,10 +16,12 @@ import RangeQuestion from '@/components/questions/RangeQuestion';
 import QuestionTypeSelector from '@/components/QuestionTypeSelector';
 import URLQuestion from "@/components/questions/UrlQuestion";
 import {useRouter} from 'next/navigation';
+import Loader from '@/components/Loader';
 
 export default function Chat() {
     const [messages, setMessages] = useState<CoreMessage[]>([]);
     const [input, setInput] = useState('');
+    const [submittedQuestion, setSubmittedQuestion] = useState('');
     const [loading, setLoading] = useState(false);
     const [dots, setDots] = useState(1);
     const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<string[]>([]);
@@ -27,7 +29,6 @@ export default function Chat() {
     const [questions, setQuestions] = useState<any[]>([]);
     const [gradingResults, setGradingResults] = useState<{ questionId: string, isCorrect: boolean | null, automatedResponse?: string, score?: number }[]>([]);
     const router = useRouter();
-
 
     useEffect(() => {
         if (loading) {
@@ -47,105 +48,25 @@ export default function Chat() {
         );
     };
 
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setSubmittedQuestion(input);
 
-    const checkAnswers = async () => {
-        console.log('User Answers:', userAnswers);
-        console.log('Questions:', questions);
-
-        const results = await gradeAnswers(userAnswers, questions);
-        console.log('Grading results:', results);
-
-        const resultsArray = Array.isArray(results.data) ? results.data : [results.data];
-
-        let totalScore = 0;
-
-        const scoredResults = resultsArray.map((result: { questionId: string, isCorrect: boolean | null, automatedResponse?: string, score?: number }) => {
-            const score = result.score || 0;
-            totalScore += score;
-            console.log(`Question ${result.questionId} Score: ${score}`);
-            return { ...result, score };
-        });
-
-        setGradingResults(scoredResults);
-        console.log('Total Score:', totalScore);
-    };
-
-    const handleAnswerChange = (questionId: string, answer: string | string[]) => {
-        console.log(`Updating answer for question ${questionId}:`, answer);
-        setUserAnswers((prevAnswers) => ({
-            ...prevAnswers,
-            [questionId]: answer,
-        }));
-    };
-
-    const renderQuestion = (question: any) => {
-        switch (question.type) {
-            case 'multiple-choice':
-                return <MultipleChoiceQuestion questionId={question.id} title={question.title} choices={question.choices} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
-            case 'checkboxes':
-                return <CheckboxQuestion title={question.title} choices={question.choices} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
-            case 'dropdown':
-                return <DropdownQuestion title={question.title} choices={question.choices} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
-            case 'text':
-                return <TextQuestion title={question.title} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
-            case 'paragraph':
-                return <ParagraphQuestion title={question.title} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
-            case 'coding':
-                return <CodingQuestion title={question.title} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
-            case 'linear-scale':
-                return <LinearScaleQuestion title={question.title} min={question.min} max={question.max} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
-            case 'date':
-                return <DateQuestion title={question.title} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
-            case 'file-upload':
-                return <FileUploadQuestion title={question.title} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
-            case 'range':
-                return <RangeQuestion title={question.title} min={question.min} max={question.max} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
-            case 'url':
-                return <URLQuestion title={question.title} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
-            default:
-                return null;
+        try {
+            const result = await fetchGeneratedQuestions(input, selectedQuestionTypes);
+            localStorage.setItem('generatedQuestions', JSON.stringify(result.data));
+            router.push('/questions');
+        } catch (error) {
+            console.error('Error generating questions:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
         <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
-            <form
-                onSubmit={async e => {
-                    e.preventDefault();
-                    setLoading(true);
-                    const newMessages: CoreMessage[] = [
-                        ...messages,
-                        { content: input, role: 'user' },
-                    ];
-
-                    setMessages(newMessages);
-                    setInput('');
-
-                    try {
-                        const result = await fetchGeneratedQuestions(input, selectedQuestionTypes);
-                        console.log('Generated questions:', result.data);
-                        setQuestions(result.data);
-
-                        // Store questions in localStorage
-                        localStorage.setItem('generatedQuestions', JSON.stringify(result.data));
-
-                        // Navigate to /questions route
-                        router.push('/questions');
-
-                        setMessages([
-                            ...newMessages,
-                            ...result.data.map((question: any) => ({
-                                role: 'assistant' as const,
-                                content: question,
-                            })),
-                        ]);
-                    } catch (error) {
-                        console.error('Error generating questions:', error);
-                    } finally {
-                        setLoading(false);
-                    }
-                }}
-            >
+            <form onSubmit={handleSubmit}>
                 <input
                     className="w-full p-4 mb-4 border border-gray-300 rounded shadow-xl text-lg"
                     value={input}
@@ -154,47 +75,12 @@ export default function Chat() {
                 />
             </form>
             <QuestionTypeSelector selectedTypes={selectedQuestionTypes} onTypeChange={handleTypeChange} />
-            <div className="flex flex-col space-y-4">
-                {Array.isArray(messages) && messages.map((m, i) => (
-                    <div key={i} className="whitespace-pre-wrap">
-                        {m.role === 'user' ? 'User: ' : 'AI: '}
-                        {typeof m.content === 'string' ? m.content : renderQuestion(m.content)}
-                    </div>
-                ))}
-
-                {loading && (
-                    <div className="flex justify-start items-center py-4">
-                        <span className="ml-2 text-gray-500">
-                            {`Generating questions${'.'.repeat(dots)}`}
-                        </span>
-                    </div>
-                )}
-            </div>
-            <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
-                {questions.length > 0 && (
-                    <button onClick={checkAnswers} className="px-4 py-2 bg-green-500 text-white rounded mt-4">
-                        Check Answers
-                    </button>
-                )}
-                <div className="mt-4 space-y-2">
-                    {gradingResults?.map(result => (
-                        <div key={result?.questionId} className="p-2 border rounded">
-                            <span className="font-bold">Question {result?.questionId}:</span>
-                            {result?.isCorrect === null ? (
-                                <span className="text-gray-500 ml-2">Not applicable</span>
-                            ) : result?.isCorrect ? (
-                                <span className="text-green-500 ml-2">Correct</span>
-                            ) : (
-                                <span className="text-red-500 ml-2">Incorrect</span>
-                            )}
-                            {result?.automatedResponse && (
-                                <div className="mt-2 text-gray-700">{result?.automatedResponse}</div>
-                            )}
-                            <div className="mt-2 text-gray-700">Score: {result?.score} / 5</div>
-                        </div>
-                    ))}
+            {submittedQuestion && (
+                <div className="mt-4">
+                    <p className="text-lg">{submittedQuestion}</p>
                 </div>
-            </div>
+            )}
+            {loading && <Loader className="ml-1 mt-4" />}
         </div>
     );
 }
