@@ -3,42 +3,19 @@
 import { type CoreMessage } from 'ai';
 import { useState, useEffect } from 'react';
 import { fetchGeneratedQuestions, gradeAnswers } from "@/utils/api";
-import MultipleChoiceQuestion from '@/components/questions/MultipleChoiceQuestion';
-import CheckboxQuestion from '@/components/questions/CheckboxQuestion';
-import TextQuestion from '@/components/questions/TextQuestion';
-import ParagraphQuestion from '@/components/questions/ParagraphQuestion';
-import CodingQuestion from '@/components/questions/CodingQuestion';
-import DropdownQuestion from '@/components/questions/DropdownQuestion';
-import LinearScaleQuestion from '@/components/questions/LinearScaleQuestion';
-import DateQuestion from '@/components/questions/DateQuestion';
-import FileUploadQuestion from '@/components/questions/FileUploadQuestion';
-import RangeQuestion from '@/components/questions/RangeQuestion';
 import QuestionTypeSelector from '@/components/QuestionTypeSelector';
-import URLQuestion from "@/components/questions/UrlQuestion";
 import {useRouter} from 'next/navigation';
 import Loader from '@/components/Loader';
 
 export default function Chat() {
-    const [messages, setMessages] = useState<CoreMessage[]>([]);
     const [input, setInput] = useState('');
     const [submittedQuestion, setSubmittedQuestion] = useState('');
     const [loading, setLoading] = useState(false);
-    const [dots, setDots] = useState(1);
     const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<string[]>([]);
-    const [userAnswers, setUserAnswers] = useState<{ [key: string]: string | string[] }>({});
     const [questions, setQuestions] = useState<any[]>([]);
-    const [gradingResults, setGradingResults] = useState<{ questionId: string, isCorrect: boolean | null, automatedResponse?: string, score?: number }[]>([]);
     const router = useRouter();
 
-    useEffect(() => {
-        if (loading) {
-            const interval = setInterval(() => {
-                setDots(prevDots => (prevDots % 3) + 1);
-            }, 500);
 
-            return () => clearInterval(interval);
-        }
-    }, [loading]);
 
     const handleTypeChange = (type: string) => {
         setSelectedQuestionTypes((prevTypes) =>
