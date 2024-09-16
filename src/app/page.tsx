@@ -15,6 +15,7 @@ import FileUploadQuestion from '@/components/questions/FileUploadQuestion';
 import RangeQuestion from '@/components/questions/RangeQuestion';
 import QuestionTypeSelector from '@/components/QuestionTypeSelector';
 import URLQuestion from "@/components/questions/UrlQuestion";
+import {useRouter} from 'next/navigation';
 
 export default function Chat() {
     const [messages, setMessages] = useState<CoreMessage[]>([]);
@@ -25,6 +26,8 @@ export default function Chat() {
     const [userAnswers, setUserAnswers] = useState<{ [key: string]: string | string[] }>({});
     const [questions, setQuestions] = useState<any[]>([]);
     const [gradingResults, setGradingResults] = useState<{ questionId: string, isCorrect: boolean | null, automatedResponse?: string, score?: number }[]>([]);
+    const router = useRouter();
+
 
     useEffect(() => {
         if (loading) {
@@ -43,6 +46,7 @@ export default function Chat() {
                 : [...prevTypes, type]
         );
     };
+
 
     const checkAnswers = async () => {
         console.log('User Answers:', userAnswers);
@@ -77,7 +81,7 @@ export default function Chat() {
     const renderQuestion = (question: any) => {
         switch (question.type) {
             case 'multiple-choice':
-                return <MultipleChoiceQuestion questionId={question.id} title={question.title} choices={question.choices} onAnswerChange={handleAnswerChange} />;
+                return <MultipleChoiceQuestion questionId={question.id} title={question.title} choices={question.choices} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
             case 'checkboxes':
                 return <CheckboxQuestion title={question.title} choices={question.choices} onAnswerChange={(answer) => handleAnswerChange(question.id, answer)} />;
             case 'dropdown':
@@ -104,7 +108,7 @@ export default function Chat() {
     };
 
     return (
-        <div className="flex flex-col w-full max-w-2xl px-4 py-24 mx-auto">
+        <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
             <form
                 onSubmit={async e => {
                     e.preventDefault();
@@ -122,6 +126,12 @@ export default function Chat() {
                         console.log('Generated questions:', result.data);
                         setQuestions(result.data);
 
+                        // Store questions in localStorage
+                        localStorage.setItem('generatedQuestions', JSON.stringify(result.data));
+
+                        // Navigate to /questions route
+                        router.push('/questions');
+
                         setMessages([
                             ...newMessages,
                             ...result.data.map((question: any) => ({
@@ -137,19 +147,17 @@ export default function Chat() {
                 }}
             >
                 <input
-                    className="w-full p-2 mb-4 border border-gray-300 rounded shadow-xl"
+                    className="w-full p-4 mb-4 border border-gray-300 rounded shadow-xl text-lg"
                     value={input}
                     placeholder="Say something..."
                     onChange={e => setInput(e.target.value)}
                 />
             </form>
-            <div className='flex justify-center'>
-                <QuestionTypeSelector selectedTypes={selectedQuestionTypes} onTypeChange={handleTypeChange} />
-            </div>
+            <QuestionTypeSelector selectedTypes={selectedQuestionTypes} onTypeChange={handleTypeChange} />
             <div className="flex flex-col space-y-4">
-                {messages.map((m, i) => (
-                    <div key={i} className="my-4">
-                        {m.role === 'user' ? `User ${i + 1}: ` : `Question ${i + 1} `}
+                {Array.isArray(messages) && messages.map((m, i) => (
+                    <div key={i} className="whitespace-pre-wrap">
+                        {m.role === 'user' ? 'User: ' : 'AI: '}
                         {typeof m.content === 'string' ? m.content : renderQuestion(m.content)}
                     </div>
                 ))}
@@ -185,9 +193,6 @@ export default function Chat() {
                             <div className="mt-2 text-gray-700">Score: {result?.score} / 5</div>
                         </div>
                     ))}
-                    <div className="mt-4 text-xl font-bold">
-                        Total Score: {gradingResults.reduce((acc, result) => acc + (result?.score || 0), 0)} / {gradingResults.length * 5}
-                    </div>
                 </div>
             </div>
         </div>

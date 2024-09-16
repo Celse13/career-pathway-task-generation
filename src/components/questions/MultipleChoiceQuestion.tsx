@@ -38,7 +38,7 @@ const MultipleChoiceQuestion = ({ questionId, title, choices: initialChoices, on
         const choice = choices.find(choice => choice.id === selectedId);
         if (choice) {
             console.log(`Selected Choice ID: ${choice.id}, Choice: ${choice.choice}`);
-            onAnswerChange(questionId, choice.choice);
+            onAnswerChange(choice.choice, questionId);
         }
     };
 

@@ -1,5 +1,5 @@
-import React from 'react';
 import { questionTypes, QuestionType } from '@/Types/QuestionTypes';
+import icons from './questions/QuestionTypeIcon'; // Import the icons
 
 interface QuestionTypeSelectorProps {
     selectedTypes: string[];
@@ -8,21 +8,18 @@ interface QuestionTypeSelectorProps {
 
 const QuestionTypeSelector = ({ selectedTypes, onTypeChange }: QuestionTypeSelectorProps) => {
     return (
-        <div className="p-4 bg-white rounded shadow-md w-full">
-            <h3 className="text-lg font-semibold mb-4">Select Question Types</h3>
-            <div className="grid grid-cols-2 gap-4">
-                {Object.keys(questionTypes).map((type) => (
-                    <label key={type} className="flex items-center space-x-2">
-                        <input
-                            type="checkbox"
-                            checked={selectedTypes.includes(type)}
-                            onChange={() => onTypeChange(type)}
-                            className="form-checkbox h-5 w-5 text-blue-600"
-                        />
-                        <span className="text-gray-700">{questionTypes[type as QuestionType]}</span>
-                    </label>
-                ))}
-            </div>
+        <div className="grid grid-cols-2 gap-3 w-full">
+            {Object.keys(questionTypes).map((type) => (
+                <button
+                    key={type}
+                    className={`flex items-center justify-start p-3 w-full border rounded-lg space-x-2 
+            ${selectedTypes.includes(type) ? 'bg-blue-100 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                    onClick={() => onTypeChange(type)}
+                >
+                    <span className="w-5 h-5 flex-shrink-0">{icons[type as keyof typeof icons]}</span>
+                    <span className="text-gray-700 text-base font-medium text-left">{questionTypes[type as QuestionType]}</span>
+                </button>
+            ))}
         </div>
     );
 };
