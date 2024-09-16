@@ -76,6 +76,7 @@ export const rangeQuestionTable = pgTable('range_questions', {
     id: uuid('id').primaryKey().references(() => baseQuestions.id),
     min: integer('min').notNull(),
     max: integer('max').notNull(),
+    correctValue: integer('correct_value').notNull(),
     step: integer('step'),
 });
 
@@ -92,14 +93,13 @@ export const codingQuestionTable = pgTable('coding_test_cases', {
     testCases: json('test_cases').$type<Array<{
         input: string,
         output: string,
-    }>>().notNull(),
+    }>>(),
     metadata: json('metadata'),
 });
 
 export const dateQuestionTable = pgTable('date_questions', {
     id: uuid('id').primaryKey().references(() => baseQuestions.id),
-    minDate: date('min_date').notNull(),
-    maxDate: date('max_date').notNull(),
+    date: date('date'),
     metadata: json('metadata'),
 });
 

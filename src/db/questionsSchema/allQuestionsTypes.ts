@@ -32,7 +32,7 @@ export const multipleChoiceQuestionSchema = baseQuestionSchema.extend({
 export const checkboxesQuestionSchema = baseQuestionSchema.extend({
     type: z.literal('checkboxes'),
     choices: z.array(z.object({
-        id: z.string().uuid().default(() => uuidv4()), 
+        id: z.string().uuid().default(() => uuidv4()),
         choice: z.string(),
         isCorrect: z.boolean().optional(),
     }))
@@ -58,8 +58,7 @@ export const linearScaleQuestionSchema = baseQuestionSchema.extend({
 
 export const dateQuestionSchema = baseQuestionSchema.extend({
     type: z.literal('date'),
-    minDate: z.string().optional(),
-    maxDate: z.string().optional(),
+    date: z.string(),
     metadata: metadataSchema,
 });
 
@@ -74,6 +73,7 @@ export const rangeQuestionSchema = baseQuestionSchema.extend({
     min: z.number(),
     max: z.number(),
     step: z.number().optional(),
+    correctValue: z.number(),
     metadata: metadataSchema,
 });
 

@@ -7,7 +7,7 @@ interface FileUploadQuestionProps {
 
 const FileUploadQuestion = ({ title, onAnswerChange } : FileUploadQuestionProps) => {
     return (
-        <Card className="w-[640px]">
+        <Card className="shadow-lg rounded-lg border border-gray-200 w-full">
             <CardHeader>
                 <CardTitle>{title}</CardTitle>
             </CardHeader>

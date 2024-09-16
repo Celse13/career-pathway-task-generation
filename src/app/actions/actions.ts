@@ -146,6 +146,7 @@ const saveQuestionsToDB = async (questions: any[]) => {
                     min: question.min,
                     max: question.max,
                     step: question.step,
+                    correctValue: question.correctValue,
                 });
                 break;
             case 'rating':
@@ -167,8 +168,7 @@ const saveQuestionsToDB = async (questions: any[]) => {
             case 'date':
                 await db.insert(dateQuestionTable).values({
                     id: question.id,
-                    minDate: question.minDate,
-                    maxDate: question.maxDate,
+                    date: question.date,
                     metadata: question.metadata,
             });
             case 'url':
@@ -236,6 +236,20 @@ export const gradeAnswers = async (userAnswers: { [key: string]: string | string
                 isCorrect = aiGradingResult.isCorrect;
                 score = aiGradingResult.score;
                 automatedResponse = aiGradingResult.automatedResponse;
+                break;
+            case 'date':
+                isCorrect = userAnswer === question.date;
+                score = isCorrect ? 5 : 0;
+                automatedResponse = isCorrect ? 'Correct!' : `Incorrect. The correct date is '${question.date}'.`;
+                break;
+            case 'range':
+                isCorrect = userAnswer === question.correctValue;
+                score = isCorrect ? 5 : 0;
+                automatedResponse = isCorrect ? 'Correct!' : `Incorrect. The correct date is '${question.correctAnswer}'.`
+                break
+            case 'coding':
+                break;
+            case 'linear-scale':
                 break;
 
             default:
