@@ -1,21 +1,19 @@
 'use client';
 
-import { type CoreMessage } from 'ai';
-import { useState, useEffect } from 'react';
-import { fetchGeneratedQuestions, gradeAnswers } from "@/utils/api";
+import { useState } from 'react';
+import { fetchGeneratedQuestions } from "@/utils/api";
 import QuestionTypeSelector from '@/components/QuestionTypeSelector';
-import {useRouter} from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Loader from '@/components/Loader';
+import DifficultyTag from '@/components/DifficultyTag';
 
 export default function Chat() {
     const [input, setInput] = useState('');
     const [submittedQuestion, setSubmittedQuestion] = useState('');
     const [loading, setLoading] = useState(false);
     const [selectedQuestionTypes, setSelectedQuestionTypes] = useState<string[]>([]);
-    const [questions, setQuestions] = useState<any[]>([]);
+    const [difficultyLevel, setDifficultyLevel] = useState<'EASY' | 'MEDIUM' | 'HARD'>('EASY');
     const router = useRouter();
-
-
 
     const handleTypeChange = (type: string) => {
         setSelectedQuestionTypes((prevTypes) =>
@@ -25,13 +23,17 @@ export default function Chat() {
         );
     };
 
+    const handleDifficultyChange = (level: 'EASY' | 'MEDIUM' | 'HARD') => {
+        setDifficultyLevel(level);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setSubmittedQuestion(input);
 
         try {
-            const result = await fetchGeneratedQuestions(input, selectedQuestionTypes);
+            const result = await fetchGeneratedQuestions(input, selectedQuestionTypes, difficultyLevel);
             localStorage.setItem('generatedQuestions', JSON.stringify(result.data));
             router.push('/questions');
         } catch (error) {
@@ -50,6 +52,16 @@ export default function Chat() {
                     placeholder="Say something..."
                     onChange={e => setInput(e.target.value)}
                 />
+                <div className="flex justify-evenly mb-4 border border-gray-300 rounded-lg p-2">
+                    {['EASY', 'MEDIUM', 'HARD'].map(level => (
+                        <DifficultyTag
+                            key={level}
+                            level={level as 'EASY' | 'MEDIUM' | 'HARD'}
+                            selected={difficultyLevel === level}
+                            onClick={() => handleDifficultyChange(level as 'EASY' | 'MEDIUM' | 'HARD')}
+                        />
+                    ))}
+                </div>
             </form>
             <QuestionTypeSelector selectedTypes={selectedQuestionTypes} onTypeChange={handleTypeChange} />
             {submittedQuestion && (

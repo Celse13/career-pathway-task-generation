@@ -18,7 +18,7 @@ import {
     URLQuestionTable
 } from "@/database/questionsSchema";
 
-export const generateQuestions = async (input: string, selectedQuestionTypes: string[] = []) => {
+export const generateQuestions = async (input: string, selectedQuestionTypes: string[] = [], difficultyLevel: 'EASY' | 'MEDIUM' | 'HARD') => {
     'use server';
 
     try {
@@ -26,9 +26,10 @@ export const generateQuestions = async (input: string, selectedQuestionTypes: st
             Based on the following input: "${input}", generate a list of questions.
             Ensure that the questions are formatted as valid JSON.
             The user has specified preferred question types: ${JSON.stringify(selectedQuestionTypes)}.
-            Only generate questions that match the specified types.
+            The user has specified a difficulty level: ${difficultyLevel}.
+            Only generate questions that match the specified types and difficulty level.
             If no types are specified, generate a diverse set of questions.
-            Avoid including any questions that do not conform to the specified types.
+            Avoid including any questions that do not conform to the specified types and difficulty level.
         `;
 
         const { object: task } = await generateObject({
@@ -36,7 +37,7 @@ export const generateQuestions = async (input: string, selectedQuestionTypes: st
             prompt: prompt,
             system: `
                  You are a question generator.
-                 Adhere strictly to the user's specified question types.
+                 Adhere strictly to the user's specified question types and difficulty level.
                  If the input specifies a question type, only generate that type.
                  If no types are specified, create a variety of questions.
                  Ensure all output is in valid JSON format.
@@ -55,8 +56,6 @@ export const generateQuestions = async (input: string, selectedQuestionTypes: st
                 console.log(`  ${key}:`, value);
             });
         });
-
-        await saveQuestionsToDB(validatedQuestions);
 
         return validatedQuestions;
 

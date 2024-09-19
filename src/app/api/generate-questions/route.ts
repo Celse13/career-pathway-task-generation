@@ -3,9 +3,10 @@ import { questionSchema } from "@/db/questionSchema";
 import {generateQuestions} from "@/app/actions/actions";
 
 
+
 export async function POST(req: NextRequest) {
     try {
-        const { input, selectedQuestionTypes } = await req.json();
+        const { input, selectedQuestionTypes, difficultyLevel } = await req.json();
 
         if (!input) {
             return NextResponse.json(
@@ -14,7 +15,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const task = await generateQuestions(input, selectedQuestionTypes);
+        const task = await generateQuestions(input, selectedQuestionTypes, difficultyLevel);
 
         const parsedQuestions = questionSchema.array().parse(task);
         if (!parsedQuestions) {

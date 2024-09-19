@@ -5,11 +5,12 @@ interface GenerateQuestionsResponse {
     data: any[]
 }
 
-export const fetchGeneratedQuestions = async (input: string, selectedQuestionTypes: string[]): Promise<GenerateQuestionsResponse> => {
+export const fetchGeneratedQuestions = async (input: string, selectedQuestionTypes: string[], difficultyLevel: 'EASY' | 'MEDIUM' | 'HARD'): Promise<GenerateQuestionsResponse> => {
     try {
         const response = await axios.post('/api/generate-questions', {
             input,
             selectedQuestionTypes,
+            difficultyLevel
         });
 
         return response.data;
