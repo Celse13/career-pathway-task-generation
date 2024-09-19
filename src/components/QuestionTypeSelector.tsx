@@ -1,5 +1,5 @@
 import { questionTypes, QuestionType } from '@/Types/QuestionTypes';
-import icons from './questions/QuestionTypeIcon'; // Import the icons
+import icons from './questions/QuestionTypeIcon';
 
 interface QuestionTypeSelectorProps {
     selectedTypes: string[];

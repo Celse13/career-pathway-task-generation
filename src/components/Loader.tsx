@@ -4,9 +4,9 @@ interface LoaderProps {
     className?: string;
 }
 
-const Loader: React.FC<LoaderProps> = ({ className }) => {
+const Loader = ({ className }: LoaderProps) => {
     return (
-        <div className={`relative w-2 h-2 ${className}`}>
+        <div className={`relative w-2 h-2 ml-2 ${className}`}>
             <div className="relative w-2 h-2">
                 {[...Array(7)].map((_, i) => (
                     <div key={i} className={`absolute w-2 h-1 bg-gray-800 mt-0.5 animate-honeycomb ${getPositionClass(i)}`}></div>
