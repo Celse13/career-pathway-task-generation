@@ -8,11 +8,6 @@ An AI-powered assessment builder that generates practice questions from a prompt
 
 **Live demo:** https://career-pathway-task-generation.vercel.app
 
-## Screenshot
-
-<!-- TODO: add a screenshot of the question generator -->
-![Question generator](./public/screenshot.png)
-
 ## Tech stack
 
 | Concern | Tool |
